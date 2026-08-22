@@ -76,8 +76,8 @@ public class GameSystem : MonoBehaviour
     
     void GetParts()
     {
-        LayerMask lMask = LayerMask.NameToLayer("Entity");
-        bool isHit = Physics.Raycast(MainRay,out RaycastHit hitInfo);
+        LayerMask lMask = LayerMask.GetMask("Entity");
+        bool isHit = Physics.Raycast(MainRay,out RaycastHit hitInfo,lMask);
 
         Debug.Log("Hit : " + isHit);
 
