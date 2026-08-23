@@ -6,13 +6,13 @@ public class Doors : MovingObject
 {
     [SerializeField]
     Bounds ElementSq;
-    List<Parts> InsideParts = new List<Parts>();
+    public List<Parts> InsideParts = new List<Parts>();
 
     // Start is called before the first frame update
-    void Start()
-    {
+    // void Start()
+    // {
         
-    }
+    // }
 
     // Update is called once per frame
     void Update()
@@ -26,13 +26,13 @@ public class Doors : MovingObject
 
     override public void OnMove()
     {
-        if(InsideParts.Count > 3)
+        if(InsideParts.Count >= 3)
         {
             Debug.Log("Door Interacted");
-            foreach(Parts part in InsideParts)
-            {
-                part.BroadcastMessage("OnMove");
-            }
+            // foreach(Parts part in InsideParts)
+            // {
+            //     part.BroadcastMessage("OnMove");
+            // }
             GameSystem.self.CalculateParts(InsideParts);
             base.OnMove();
         }

@@ -135,9 +135,9 @@ public class GameSystem : MonoBehaviour
     {
         float CalcScore = 0f;
         int totalParts = parts.Count;
-        List<Parts> Triangles = (List<Parts>)parts.Where(pt => pt.pType == Parts.PartType.Triangle);
-        List<Parts> Sphere = (List<Parts>)parts.Where(pt => pt.pType == Parts.PartType.Sphere);
-        List<Parts> Box = (List<Parts>)parts.Where(pt => pt.pType == Parts.PartType.Box);
+        // List<Parts> Triangles = (List<Parts>)parts.Where(pt => pt.pType == Parts.PartType.Triangle);
+        // List<Parts> Sphere = (List<Parts>)parts.Where(pt => pt.pType == Parts.PartType.Sphere);
+        // List<Parts> Box = (List<Parts>)parts.Where(pt => pt.pType == Parts.PartType.Box);
 
         
         //シェープで分ける.
@@ -156,6 +156,7 @@ public class GameSystem : MonoBehaviour
         foreach(Parts part in parts)
         {
             colors.Add(part.color);
+            Debug.Log("col added : " + part.color );
         }
         //トータルパーツが3未満の場合は、スコアを0にする. 
         if( totalParts < 3)
@@ -189,20 +190,16 @@ public class GameSystem : MonoBehaviour
             */
             else
             {
-                List<int> colorCounts = new List<int>();
+                int ColorMax = colors.Max();
+                int[] colorCounts = new int[ColorMax + 1];
+                Debug.Log(ColorMax);
                 //カラーの種類ごとの個数
                 foreach(int color in colors)
                 {
-                    int index = colors.IndexOf(color);
-                    if(index == -1)
-                    {
-                        colorCounts.Add(color);
-                    }
-                    else
-                    {
-                        colorCounts[index] += 1;
-                    }
+                    colorCounts[color] += 1;
                 }
+                // //0でないものを考慮する. 1個でも入ってたらそれが最低値.
+                // colorCounts = colorCounts.ToList().Where(ct => ct != 0).ToList();
                 //カラーが均等に分布している場合は、ボーナス点を加算する. 
                 if(colorCounts.Max() == colorCounts.Min())
                 {
@@ -212,6 +209,7 @@ public class GameSystem : MonoBehaviour
                 {
                     colorScore = colorCounts.Min() / colorCounts.Max();
                 }
+                Debug.Log("ColorScore is " + colorScore);
             }
 
 
