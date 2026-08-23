@@ -8,6 +8,7 @@ public class InputInstance : MonoBehaviour
     InputMaster inputMaster;
     public Vector2 position;
     public bool isClicked;
+    public int clickingTime;
     void Awake()
     {
         if (self != null)
@@ -30,10 +31,11 @@ public class InputInstance : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public void InputUpdate()
     {
         position = inputMaster.Basic.ScreenPosition.ReadValue<Vector2>();
         isClicked = inputMaster.Basic.Click.ReadValue<float>() > 0.5f;
+        clickingTime = isClicked ? clickingTime + 1 : 0;
         // Vector3 pos = Camera.main.ScreenToWorldPoint(position);
     }
 }
