@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class GameSystem : MonoBehaviour
 {
@@ -141,7 +143,7 @@ public class GameSystem : MonoBehaviour
 
         
         //シェープで分ける.
-        var Shapes = parts.GroupBy(pt => pt.pType).ToList();
+        var Shapes = parts.GroupBy(pt => pt.PartType).ToList();
 
         foreach(var shape in Shapes)
         {
@@ -152,12 +154,6 @@ public class GameSystem : MonoBehaviour
         // BonusSphere = Sphere.Count > 0 ? 1f : 0f;
         // BonusBox = Box.Count > 0 ? 1f : 0f;
 
-        List<int> colors = new List<int>();
-        foreach(Parts part in parts)
-        {
-            colors.Add(part.color);
-            Debug.Log("col added : " + part.color );
-        }
         //トータルパーツが3未満の場合は、スコアを0にする. 
         if( totalParts < 3)
         {
@@ -165,6 +161,13 @@ public class GameSystem : MonoBehaviour
         }
         else
         {
+            List<int> colors = new List<int>();
+            foreach(Parts part in parts)
+            {
+                colors.Add(part.color);
+                Debug.Log("col added : " + part.color );
+            }
+            
             //パーツ総数（基礎得点）
             float partScore = (float)totalParts;
             //カラー種類数
@@ -190,50 +193,66 @@ public class GameSystem : MonoBehaviour
             */
             else
             {
-                int ColorMax = colors.Max();
-                int[] colorCounts = new int[ColorMax + 1];
-                Debug.Log(ColorMax);
-                //カラーの種類ごとの個数
-                foreach(int color in colors)
+                //カラーの個別情報をリスト化.
+                // colorNumsはcolorDistinctと同値のサイズを取るはず.
+                List<int> colorDistinct = colors.Distinct().ToList();
+                List<int> colorNums = new List<int>();
+                foreach(int cD in colorDistinct)
                 {
-                    colorCounts[color] += 1;
+                    //colorDistinctの値で個数を数える.
+                    colorNums.Add(colors.Count(keys => keys == cD));
                 }
-                // //0でないものを考慮する. 1個でも入ってたらそれが最低値.
-                // colorCounts = colorCounts.ToList().Where(ct => ct != 0).ToList();
-                //カラーが均等に分布している場合は、ボーナス点を加算する. 
-                if(colorCounts.Max() == colorCounts.Min())
+
+                int MaxColors = colorNums.Max();
+                int MinColors = colorNums.Min();
+                colorScore = Mathf.Max(1.0f,colorDistinct.Count() * ((float)MinColors / MaxColors));
+                //カラーが均一なら2倍ボーナス.
+                if(MaxColors == MinColors)
                 {
-                    colorScore = 2f;
-                }
-                else
-                {
-                    colorScore = colorCounts.Min() / colorCounts.Max();
+                    colorScore = 2.0f;
                 }
                 Debug.Log("ColorScore is " + colorScore);
             }
 
 
             float TypeScore = 0f;
-            //パーツの種類が均等に分布している場合は、ボーナス点を加算する.
+            //パーツの種類を考慮する.
             List<int> typeCounts = new List<int>();
             foreach(Parts part in parts)
             {
-                int index = typeCounts.IndexOf((int)part.pType);
-                if(index == -1)
-                {
-                    typeCounts.Add((int)part.pType);
-                }
-                else
-                {
-                    typeCounts[index] += 1;
-                }
+                typeCounts.Add(part.PartType);
             }
-            //パーツの種類が均等に分布している場合は、ボーナス点を加算する.
-            if(typeCounts.Max() == typeCounts.Min())
+            //パーツが統一されているなら、ボーナス. 但し3つ以上で均等に揃えている方が高く付く.
+            if(typeCounts.Distinct().Count() == 1)
             {
-                // ここにボーナス点の計算ロジックを追加
+                TypeScore = 2f;
             }
+            else
+            {
+                //パーツの個別情報をリスト化.
+                // colorNumsはcolorDistinctと同値のサイズを取るはず.
+                List<int> partsDistinct = typeCounts.Distinct().ToList();
+                List<int> partsNums = new List<int>();
+                foreach(int pD in partsDistinct)
+                {
+                    //colorDistinctの値で個数を数える.
+                    partsNums.Add(colors.Count(keys => keys == pD));
+                }
+
+                int MaxParts = partsNums.Max();
+                int MinParts = partsNums.Min();
+                TypeScore = MinParts / MaxParts;
+                //パーツの種類が均等に分布している場合は、ボーナス点を加算する.
+                if(MaxParts == MinParts)
+                {
+                    TypeScore = partsDistinct.Count();
+                }
+            }
+            Debug.Log("PartsScore is " + TypeScore);
+            //最終的にパーツ数 x シェイプタイプスコア x カラーリング統一性で決定される;
+            CalcScore = 100 * parts.Count() * TypeScore * colorScore;
         }
+        Debug.Log("CalcScore is " + CalcScore);
 
     }
 

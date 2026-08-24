@@ -9,15 +9,12 @@ public class Parts : MonoBehaviour
     //1 = Magenta,
     //2 = Cyan
     public int color = 0;
-    public PartType pType;
-
+    //PartTypeは以下として考える.
+    //0 = Orb,
+    //1 = Tris,
+    //2 = Cube
+    public int PartType;
     float yPos = 1f;
-    public enum PartType
-    {
-        Triangle,
-        Sphere,
-        Box
-    }
 
     MeshRenderer rend;
     public bool isGrabbed;
