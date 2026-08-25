@@ -69,9 +69,13 @@ public class Manufacture : MonoBehaviour
             float partScore = (float)totalParts;
             //カラー種類数
             float colorScore;
+
+            bool isColorMirraged = false;
             //色が統一されている場合は、ボーナス点を加算する.
             if(colors.Distinct().Count() == 1)
             {
+                Debug.Log("The PURE Archived");
+                isColorMirraged = true;
                 colorScore = 4f;
             }
             /*
@@ -103,10 +107,16 @@ public class Manufacture : MonoBehaviour
                 int MaxColors = colorNums.Max();
                 int MinColors = colorNums.Min();
                 colorScore = Mathf.Max(1.0f,colorDistinct.Count() * ((float)MinColors / MaxColors));
-                //カラーが均一なら2倍ボーナス.
+                //カラーが均一ならボーナス.
                 if(MaxColors == MinColors)
                 {
-                    colorScore = 2.0f;
+                    Debug.Log("The E-COLOR Archived");
+                    colorScore = colorDistinct.Count * MaxColors;
+                }
+                else
+                {
+                    Debug.Log("MIX Archived");
+                    colorScore = MinColors;
                 }
                 Debug.Log("ColorScore is " + colorScore);
             }
@@ -115,6 +125,7 @@ public class Manufacture : MonoBehaviour
             float TypeScore = 0f;
             //パーツの種類を考慮する.
             List<int> typeCounts = new List<int>();
+            bool isTypeMirraged = false;
             foreach(Parts part in parts)
             {
                 typeCounts.Add(part.PartType);
@@ -122,7 +133,9 @@ public class Manufacture : MonoBehaviour
             //パーツが統一されているなら、ボーナス. 但し3つ以上で均等に揃えている方が高く付く.
             if(typeCounts.Distinct().Count() == 1)
             {
-                TypeScore = 2f;
+                Debug.Log("The MIRRAGE Archived");
+                isTypeMirraged = true;
+                TypeScore = 3f;
             }
             else
             {
@@ -142,10 +155,37 @@ public class Manufacture : MonoBehaviour
                 //パーツの種類が均等に分布している場合は、ボーナス点を加算する.
                 if(MaxParts == MinParts)
                 {
-                    TypeScore = partsDistinct.Count();
+                    Debug.Log("The DIVISION Archived");
+                    TypeScore = partsDistinct.Count() * 1.5f;
                 }
             }
             Debug.Log("PartsScore is " + TypeScore);
+            //特殊ボーナス.
+            //▲▲▲ - □□□ となるような組なら、でっかい.
+            bool isGROUPUNITY = true;
+            foreach(int p in typeCounts)
+            {
+                bool isAligned = true;
+                List<Parts> pts = parts.Where(o => o.PartType == p).ToList();
+                foreach(Parts DivByParts in pts)
+                {
+                    isAligned = pts[0].color == DivByParts.color;
+                    if(!isAligned)
+                    {
+                        isGROUPUNITY = false;
+                        break;
+                    }
+                }
+            }
+            if(isColorMirraged && isTypeMirraged)
+            {
+                Debug.Log("The PURE MIRROR Archived");
+            }
+            else if(isGROUPUNITY)
+            {
+                Debug.Log("The UNIFIED GROUP Archived");
+            }
+
             //最終的にパーツ数 x シェイプタイプスコア x カラーリング統一性で決定される;
             CalcScore = 100 * parts.Count() * TypeScore * colorScore;
         }
