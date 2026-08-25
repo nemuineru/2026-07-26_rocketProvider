@@ -17,13 +17,15 @@ public class Parts : MonoBehaviour
     float yPos = 1f;
 
     MeshRenderer rend;
-    public bool isGrabbed;
+    public Manufacture CapturedBy;
     public Rigidbody rb;
+    public Collider collider;
 
     // Start is called before the first frame update
     void Start()
     {
         rb  = GetComponent<Rigidbody>();
+        collider = GetComponent<Collider>();
         rend = GetComponent<MeshRenderer>();
         rend.material = GameSystem.self.mats[color];
     }
@@ -31,23 +33,17 @@ public class Parts : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if(transform.position.y < -10f)
+        if(CapturedBy != null)
         {
-            Destroy(gameObject);
-        }
-        rb.isKinematic = isGrabbed;
-        if(isGrabbed)
-        {
-            if(yPos < 0.0f)
-            {
-                yPos = 0.0f;
-            }
-            OnGrabbed();
-            isGrabbed = false;
+            rb.useGravity = false;
         }
         else
         {
-            yPos = transform.position.y;
+            rb.useGravity = true;
+        }
+        if(transform.position.y < -10f)
+        {
+            Destroy(gameObject);
         }
     }
 
@@ -57,5 +53,17 @@ public class Parts : MonoBehaviour
         Vector3 newPosition = plane.Raycast(GameSystem.self.MainRay, out float distance) ? 
         GameSystem.self.MainRay.GetPoint(distance) : transform.position;
         transform.position = Vector3.Lerp(transform.position, newPosition, 0.5f);
+    }
+
+    internal void SemiGraviTowards(float power, float nonRange, float ignoreColliders)
+    {
+        Vector3 Twards = (CapturedBy.transform.position - transform.position);
+        float dist = Twards.magnitude;
+        collider.enabled = ignoreColliders > dist;
+        
+        if(dist > nonRange)
+        {
+            rb.AddForce(Twards.normalized * (dist - nonRange) * power);
+        }
     }
 }

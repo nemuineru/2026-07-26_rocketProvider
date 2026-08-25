@@ -33,15 +33,8 @@ public class Doors : MovingObject
             // {
             //     part.BroadcastMessage("OnMove");
             // }
-            GameSystem.self.CalculateParts(InsideParts);
+            //GameSystem.self.CalculateParts(InsideParts);
             base.OnMove();
         }
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(ElementSq.center + transform.position, ElementSq.size);
-        //Debug.Log("Door Selected");
     }
 }
