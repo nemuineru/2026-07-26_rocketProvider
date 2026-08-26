@@ -103,7 +103,7 @@ public class GameSystem : MonoBehaviour
             {
                 parts.Add(HitPart);
                 HitPart.CapturedBy = f;
-                f.parts.Add(HitPart);
+                f.InsideParts.Add(HitPart);
                 Debug.Log("Hit Part : " + HitPart.name);
                 Debug.Log("Hit Part Layer : " + LayerMask.LayerToName(HitPart.gameObject.layer));
             }
