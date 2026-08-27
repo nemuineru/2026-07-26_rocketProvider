@@ -12,6 +12,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: ButtonColor
+    second: {fileID: 2100000, guid: 414e2a6b0deea154ba8be7a05290f62a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Rim
     second: {fileID: 2100000, guid: cbff326ab89b2874f9d5f3b3a9251ddf, type: 2}
   materials:
