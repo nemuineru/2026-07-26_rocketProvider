@@ -92,12 +92,13 @@ public class GameSystem : MonoBehaviour
     {
         LayerMask lMask = LayerMask.GetMask("Entity");
         Manufacture f = ManufacturerObjects[SetTransformIndex];
-        bool isHit = Physics.Raycast(MainRay,out RaycastHit hitInfo,lMask);
+        bool isHit = Physics.Raycast(MainRay,out RaycastHit hitInfo, 50f , lMask);
 
         //Debug.Log("Hit : " + isHit);
 
         if(isHit)
         {
+            Debug.Log("Functioning Gathering  - " + hitInfo.collider.gameObject.name);
             Parts HitPart = hitInfo.collider.gameObject.GetComponent<Parts>();
             if(HitPart != null)
             {
@@ -112,14 +113,14 @@ public class GameSystem : MonoBehaviour
 
     void PushButton()
     {
-        LayerMask lMask = LayerMask.GetMask("Button");
-        bool isHit = Physics.Raycast(MainRay,out RaycastHit hitInfo,lMask);
+        LayerMask aMask = LayerMask.GetMask("Button");
+        bool hitInfos = Physics.Raycast(MainRay,out RaycastHit hitInfo_PB, 50f , aMask);
 
-        //Debug.Log("Hit : " + isHit);
 
-        if(isHit)
+        if(hitInfos)
         {
-            PhysicalInteractable interactable = hitInfo.collider.gameObject.GetComponent<PhysicalInteractable>();
+            Debug.Log("Functioning PushButton - " + hitInfo_PB.collider.gameObject.name);
+            InteractableButton interactable = hitInfo_PB.collider.gameObject.GetComponent<InteractableButton>();
             if(interactable != null)
             {
                 interactable.SendMessage("OnInteract");

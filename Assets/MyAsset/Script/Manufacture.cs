@@ -36,7 +36,10 @@ public class Manufacture : MonoBehaviour
     {
         foreach(Parts p in InsideParts)
         {
-            p.SemiGraviTowards(GravPower,range,colliderIgnorementRange);
+            if(p != null)
+            {
+                p.SemiGraviTowards(GravPower,range,colliderIgnorementRange);
+            }
         }
     }
 

@@ -21,7 +21,10 @@ public class InteractableButton : PhysicalInteractable
     override public void OnInteract()
     {
         animator.SetTrigger("Press");
-        movingObject.BroadcastMessage("OnMove");
+        if(movingObject != null)
+        {
+            movingObject.BroadcastMessage("OnMove");            
+        }
         Debug.Log("Button Interacted");
     }
 }
