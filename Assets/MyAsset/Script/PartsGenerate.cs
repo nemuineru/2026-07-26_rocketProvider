@@ -9,6 +9,9 @@ public class PartsGenerate : MonoBehaviour
     [SerializeField]
     public Bounds bounds;
     public List<GameObject> lists;
+
+    [SerializeField]
+    float freqency = 10;
     float timerMax = 0.32f;
     float timer = 0.0f;
     // Start is called before the first frame update
@@ -20,6 +23,7 @@ public class PartsGenerate : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        timerMax = Mathf.Min(100f , 1.0f / (freqency + Mathf.Epsilon));
         if(timer > timerMax)
         {
             GameSystem.self.parts.Add(Generate());

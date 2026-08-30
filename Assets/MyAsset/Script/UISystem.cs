@@ -5,11 +5,14 @@ using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
 using System.Linq;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class UISystem : MonoBehaviour
 {
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI AddingScoreText;
+
+    float CurrentScore = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,7 +22,8 @@ public class UISystem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        CurrentScore = Mathf.Lerp(CurrentScore, GameSystem.self.Score, .2f);
+        scoreText.text = CurrentScore.ToString("F0");
     }
 
     public void ShowAddingScore(string score)

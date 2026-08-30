@@ -102,6 +102,7 @@ public class Manufacture : MonoBehaviour
         TypeScore = value_Types();
         float myscScore = MiscBonus();
         CalcScore = 100 * parts.Count() *  colorScore * TypeScore * myscScore;
+        GameSystem.self.Score += (int)CalcScore;
 
         calcDesc += "Result " + CalcScore;
         Debug.Log("CalcScore is " + CalcScore);
@@ -238,7 +239,7 @@ public class Manufacture : MonoBehaviour
     //▲▲▲ - □□□ となるような組なら、でっかい.
     float MiscBonus()
     {
-        float myscScore = 0f;
+        float myscScore = 1f;
         List<int> types = new List<int>();
 
         foreach(Parts part in InsideParts)
