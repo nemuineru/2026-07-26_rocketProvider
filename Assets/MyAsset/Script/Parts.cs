@@ -21,6 +21,21 @@ public class Parts : MonoBehaviour
     public Rigidbody rb;
     public Collider collider;
 
+    [SerializeField]
+    GameObject CaptureEffect;
+
+
+    public bool isGrabbed = false;
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if(GameSystem.self.PartSoundOnTouch.Count > 0)
+        {
+            AudioSource.PlayClipAtPoint
+            (GameSystem.self.PartSoundOnTouch[Random.Range(0, GameSystem.self.PartSoundOnTouch.Count)], transform.position);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -33,12 +48,26 @@ public class Parts : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        //キャプチャーされているときは考慮しない.
+        collider.enabled = !isGrabbed;
+        rb.useGravity = !isGrabbed;
         if(CapturedBy != null)
         {
+            gameObject.layer = LayerMask.NameToLayer("CapturedEntity");
+        }
+        else
+        {
+            gameObject.layer = LayerMask.NameToLayer("Entity");
+        }
+
+        if(CapturedBy != null)
+        {
+            CaptureEffect.SetActive(true);
             rb.useGravity = false;
         }
         else
         {
+            CaptureEffect.SetActive(false);
             rb.useGravity = true;
         }
         if(transform.position.y < -10f)
@@ -47,16 +76,43 @@ public class Parts : MonoBehaviour
         }
     }
 
-    void OnGrabbed()
+    public void OnGrabbed()
     {
-        Plane plane = new Plane(Vector3.up, Vector3.up * (yPos + 3.0f));
+        Plane plane = 
+        new Plane(GameSystem.self.PartPlane.transform.up, GameSystem.self.PartPlane.transform.position + Vector3.up * yPos);
         Vector3 newPosition = plane.Raycast(GameSystem.self.MainRay, out float distance) ? 
         GameSystem.self.MainRay.GetPoint(distance) : transform.position;
-        transform.position = Vector3.Lerp(transform.position, newPosition, 0.5f);
+        
+        Vector3 Power = (Vector3.Lerp(transform.position , newPosition, .8f) - transform.position) * 24f;
+        rb.velocity = Power;
+    }
+
+    public void OnReleased()
+    {
+        CapturedBy = null;
+        
+        Debug.Log("Released Part: " + name);
+        Plane plane = 
+        new Plane(GameSystem.self.PartPlane.transform.up, GameSystem.self.PartPlane.transform.position + Vector3.up * yPos);
+        Vector3 newPosition = plane.Raycast(GameSystem.self.MainRay, out float distance) ? 
+        GameSystem.self.MainRay.GetPoint(distance) : transform.position;
+        
+        foreach(var man in GameSystem.self.ManufacturerObjects)
+        {
+            if
+            ((newPosition - man.transform.position).magnitude < man.range || 
+            (transform.position - man.transform.position).magnitude < man.range)
+            {
+                CapturedBy = man;
+                man.InsideParts.Add(this);
+            }
+        }
     }
 
     internal void SemiGraviTowards(float power, float nonRange, float ignoreColliders)
     {
+        if(CapturedBy == null) return;
+
         Vector3 Twards = (CapturedBy.transform.position - transform.position);
         float dist = Twards.magnitude;
         collider.enabled = ignoreColliders > dist;
@@ -64,6 +120,11 @@ public class Parts : MonoBehaviour
         if(dist > nonRange)
         {
             rb.AddForce(Twards.normalized * (dist - nonRange) * power);
+            //外に向かうようならブレーキ.
+            if(Vector3.Dot(rb.velocity, Twards.normalized) < 0)
+            {
+                rb.velocity *= 0.95f; // ブレーキ
+            }
         }
     }
 }

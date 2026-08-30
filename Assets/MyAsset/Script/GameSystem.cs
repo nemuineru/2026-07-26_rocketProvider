@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +20,16 @@ public class GameSystem : MonoBehaviour
 
     public List<Manufacture> ManufacturerObjects;
 
+    //partの動きのための平面
+    public GameObject PartPlane;
+
+    public List<AudioClip> PartSoundOnTouch;
+    public List<AudioClip> PartSoundOnSelected;
+    
+    public int Score;
+
+    public UISystem uiSystem;
+
     //Static化
     void Awake()
     {
@@ -34,7 +43,7 @@ public class GameSystem : MonoBehaviour
         }
     }
 
-    void mouseSelect()
+    void mouseSgelect()
     {
     }
 
@@ -55,19 +64,27 @@ public class GameSystem : MonoBehaviour
         if(InputInstance.self.isClicked)
         {
             //Debug.Log("Click");
-            if(grabbingParts == null)
+            if(grabbingParts != null)
             {
-                //押した瞬間、ボタン押しの判定にする.
-                if(grabbingParts == null && InputInstance.self.clickingTime == 1)
-                {
-                    GetParts(0);
-                    PushButton();
-                }
+                grabbingParts.isGrabbed = true;
+                grabbingParts.OnGrabbed();
+            }
+            
+            //押した瞬間、ボタン押しの判定にする. また、パーツのグラブ判定もここで発生させる.
+            if(grabbingParts == null && InputInstance.self.clickingTime == 1)
+            {
+                GrabParts();
+                PushButton();
             }
         }
         else
         {
-            grabbingParts = null;
+            if(grabbingParts != null)
+            {
+                grabbingParts.OnReleased();
+                grabbingParts.isGrabbed = false;
+                grabbingParts = null;
+            }
         }
     }
     
@@ -88,10 +105,9 @@ public class GameSystem : MonoBehaviour
         }
     }
     
-    void GetParts(int SetTransformIndex)
+    void GrabParts()
     {
-        LayerMask lMask = LayerMask.GetMask("Entity");
-        Manufacture f = ManufacturerObjects[SetTransformIndex];
+        LayerMask lMask = LayerMask.GetMask("Entity") + LayerMask.GetMask("CapturedEntity");
         bool isHit = Physics.Raycast(MainRay,out RaycastHit hitInfo, 50f , lMask);
 
         //Debug.Log("Hit : " + isHit);
@@ -102,11 +118,15 @@ public class GameSystem : MonoBehaviour
             Parts HitPart = hitInfo.collider.gameObject.GetComponent<Parts>();
             if(HitPart != null)
             {
-                parts.Add(HitPart);
-                HitPart.CapturedBy = f;
-                f.InsideParts.Add(HitPart);
+                grabbingParts = HitPart;
                 Debug.Log("Hit Part : " + HitPart.name);
                 Debug.Log("Hit Part Layer : " + LayerMask.LayerToName(HitPart.gameObject.layer));
+            }
+            
+            if(GameSystem.self.PartSoundOnSelected.Count > 0)
+            {
+                AudioSource.PlayClipAtPoint
+                (GameSystem.self.PartSoundOnSelected[Random.Range(0, GameSystem.self.PartSoundOnSelected.Count)], transform.position);
             }
         }
     }

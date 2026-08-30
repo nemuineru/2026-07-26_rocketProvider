@@ -5,7 +5,7 @@ using UnityEngine;
 public class InteractableButton : PhysicalInteractable
 {
     Animator animator;
-    [SerializeField] MovingObject movingObject;
+    [SerializeField] Manufacture manufacture;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,9 +21,9 @@ public class InteractableButton : PhysicalInteractable
     override public void OnInteract()
     {
         animator.SetTrigger("Press");
-        if(movingObject != null)
+        if(manufacture != null)
         {
-            movingObject.BroadcastMessage("OnMove");            
+            manufacture.BroadcastMessage("Packing");            
         }
         Debug.Log("Button Interacted");
     }
