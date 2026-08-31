@@ -1,3 +1,5 @@
+
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,16 +18,40 @@ public class Parts : MonoBehaviour
     public int PartType;
     float yPos = 1f;
 
+    public float baseScore = 100f;
+
+    public bool isTrash = false;
+
+    public int HitPoint = 1;
+
     MeshRenderer rend;
     public Manufacture CapturedBy;
     public Rigidbody rb;
     public Collider collider;
 
+    //梱包完了時のエフェクト
+    [SerializeField]
+    public GameObject componentEffect;
+
+    //消去時のエフェクト
+    [SerializeField]
+    public GameObject erasingEffect;
+
+    //パーツのダメージエフェクト
+    [SerializeField]
+    public GameObject breakingEffect;
+
+    //転がってたりするときのエフェクト
+    [SerializeField]
+    GameObject GroundEffect;
+
+    //キャプチャーされているときのエフェクト
     [SerializeField]
     GameObject CaptureEffect;
 
 
     public bool isGrabbed = false;
+
 
     void OnCollisionEnter(Collision collision)
     {
@@ -35,6 +61,15 @@ public class Parts : MonoBehaviour
             (GameSystem.self.PartSoundOnTouch[Random.Range(0, GameSystem.self.PartSoundOnTouch.Count)], transform.position);
         }
     }
+    void OnCollisionStay(Collision collision)
+    {
+        Vector3 contactPoint = collision.contacts[0].point;
+        if(GroundEffect != null)
+        {
+            GroundEffect.transform.position = contactPoint;
+            GroundEffect.SetActive(true);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -42,7 +77,10 @@ public class Parts : MonoBehaviour
         rb  = GetComponent<Rigidbody>();
         collider = GetComponent<Collider>();
         rend = GetComponent<MeshRenderer>();
-        rend.material = GameSystem.self.mats[color];
+        if(!isTrash && color >= 0)
+        {
+            rend.material = GameSystem.self.mats[color];
+        }
     }
 
     // Update is called once per frame
@@ -70,20 +108,33 @@ public class Parts : MonoBehaviour
             CaptureEffect.SetActive(false);
             rb.useGravity = true;
         }
-        if(transform.position.y < -10f)
+        //何らかの原因で溶鉱炉に落ちなかったり、HPが0になった場合は削除する.
+        if (transform.position.y < -10f || HitPoint <= 0)
         {
-            Destroy(gameObject);
+            GameSystem.self.currentLimit += 1f;
+            Deletation();
         }
+        
+    }
+    
+    public void Deletation()
+    {
+        if(erasingEffect != null)
+        {
+            GameObject effect = Instantiate(erasingEffect, transform.position, Quaternion.identity);
+            Destroy(effect, 2f);
+        }
+        Destroy(gameObject);
     }
 
     public void OnGrabbed()
     {
-        Plane plane = 
+        Plane plane =
         new Plane(GameSystem.self.PartPlane.transform.up, GameSystem.self.PartPlane.transform.position + Vector3.up * yPos);
-        Vector3 newPosition = plane.Raycast(GameSystem.self.MainRay, out float distance) ? 
+        Vector3 newPosition = plane.Raycast(GameSystem.self.MainRay, out float distance) ?
         GameSystem.self.MainRay.GetPoint(distance) : transform.position;
-        
-        Vector3 Power = (Vector3.Lerp(transform.position , newPosition, .8f) - transform.position) * 24f;
+
+        Vector3 Power = (Vector3.Lerp(transform.position, newPosition, .8f) - transform.position) * 24f;
         rb.velocity = Power;
     }
 

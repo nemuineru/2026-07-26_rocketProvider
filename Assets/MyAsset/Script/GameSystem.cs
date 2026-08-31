@@ -1,3 +1,5 @@
+
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +27,22 @@ public class GameSystem : MonoBehaviour
 
     public List<AudioClip> PartSoundOnTouch;
     public List<AudioClip> PartSoundOnSelected;
-    
+
+
+    //現在の経過時間, 及びにレベル.
+    public float timeElapsed;
+
+    public int Level = 1;
+
+    //スコアと進行スピード.
     public int Score;
+
+    public float speed = 1.0f;
+    public float generatingRate = 1.0f;
+
+    //currentLimitがmaxLimitを超えたらゲームオーバーにする.
+    internal float maxLimit = 100f;
+    public float currentLimit = 0f;
 
     public UISystem uiSystem;
 
@@ -108,7 +124,7 @@ public class GameSystem : MonoBehaviour
     void GrabParts()
     {
         LayerMask lMask = LayerMask.GetMask("Entity") + LayerMask.GetMask("CapturedEntity");
-        bool isHit = Physics.Raycast(MainRay,out RaycastHit hitInfo, 50f , lMask);
+        bool isHit = Physics.SphereCast(MainRay.origin, 0.5f, MainRay.direction, out RaycastHit hitInfo, 50f , lMask);
 
         //Debug.Log("Hit : " + isHit);
 
@@ -118,6 +134,13 @@ public class GameSystem : MonoBehaviour
             Parts HitPart = hitInfo.collider.gameObject.GetComponent<Parts>();
             if(HitPart != null)
             {
+                //得点源にならないものをクリックした時はHPを減らす.
+                if (HitPart.isTrash)
+                {
+                    HitPart.HitPoint--;
+                    Instantiate(HitPart.breakingEffect, HitPart.transform.position, Quaternion.identity);
+                    return;
+                }
                 grabbingParts = HitPart;
                 Debug.Log("Hit Part : " + HitPart.name);
                 Debug.Log("Hit Part Layer : " + LayerMask.LayerToName(HitPart.gameObject.layer));
@@ -148,9 +171,7 @@ public class GameSystem : MonoBehaviour
                 Debug.Log("Hit Button Layer : " + LayerMask.LayerToName(interactable.gameObject.layer));
             }
         }
-    }
-
-    
+    }    
 
     void DebugView()
     {
