@@ -21,11 +21,17 @@ public class Manufacture : MonoBehaviour
     [SerializeField]
     public GameObject UIPrefab;
 
+    //保持可能なパーツの最大数.
+    [SerializeField]
+    public int MaxParts = 10;
+
     bool isColorMirraged = false, isTypeMirraged = false;
 
-    float TypeScore = 0f, colorScore = 0f;
+    float typeLevel = 0f, colorLevel = 0f;
 
     public string calcDesc = "";
+
+    bool isPacking = false;
 
     internal List<Parts> InsideParts = new List<Parts>();
     // Start is called before the first frame update
@@ -48,17 +54,32 @@ public class Manufacture : MonoBehaviour
         (p => p != null && p.isGrabbed == false).ToList();
     }
 
+    //圧縮再配送スクリプト
     public void Packing()
     {
-        if(InsideParts.Count > 2)
+        if (InsideParts.Count > 0 && !isPacking)
         {
             calcDesc = "";
             Debug.Log("Packing initiated");
+            isPacking = true;
             Instantiate(PackagePrefab, transform.position - transform.up * 2f, Quaternion.identity);
             CalculateParts(InsideParts);
             //パッケージアニメーションスタート.
             StartCoroutine(PackAnim());
             GameSystem.self.uiSystem.ShowAddingScore(calcDesc);
+        }
+    }
+    
+    //出荷スクリプト
+    public void Shipping()
+    {
+        if (InsideParts.Count > 0)
+        {
+            foreach (Parts p in InsideParts)
+            {
+                p.deliveryTime = 1f;
+            }
+            InsideParts.Clear();
         }
     }
 
@@ -72,11 +93,11 @@ public class Manufacture : MonoBehaviour
         // List<Parts> Sphere = (List<Parts>)parts.Where(pt => pt.pType == Parts.PartType.Sphere);
         // List<Parts> Box = (List<Parts>)parts.Where(pt => pt.pType == Parts.PartType.Box);
 
-        
+
         //シェープで分ける.
         var Shapes = parts.GroupBy(pt => pt.PartType).ToList();
 
-        foreach(var shape in Shapes)
+        foreach (var shape in Shapes)
         {
             Debug.Log("Shape : " + shape.Key + " Count : " + shape.Count());
         }
@@ -86,7 +107,7 @@ public class Manufacture : MonoBehaviour
         // BonusBox = Box.Count > 0 ? 1f : 0f;
 
         //トータルパーツが3未満の場合は、スコアを0にする. 
-        if( totalParts < 3)
+        if (totalParts < 3)
         {
             CalcScore = 0f;
         }
@@ -95,18 +116,28 @@ public class Manufacture : MonoBehaviour
             //パーツ総数（基礎得点）
             float partScore = (float)totalParts;
 
-            
-        }
-        calcDesc += "Base 100 x" + parts.Count() + '\n';
-        colorScore = value_Color();
-        TypeScore = value_Types();
-        float myscScore = MiscBonus();
-        CalcScore = 100 * parts.Count() *  colorScore * TypeScore * myscScore;
-        GameSystem.self.Score += (int)CalcScore;
 
-        calcDesc += "Result " + CalcScore;
+        }
+        float partBaseLevel = (float)parts.Average(p => p.Level);
+        calcDesc += "ベースレベル " + partBaseLevel + '\n';
+        colorLevel = value_Color();
+        typeLevel = value_Types();
+        float myscLevel = MiscBonus();
+        //成長させるレベルの計算.
+        float CalcLevel = partBaseLevel * colorLevel * typeLevel * myscLevel;
+
+        //GameSystem.self.Score += (int)CalcScore;
+
+        //コンボボーナスの計算. 
+        float comboBonus =
+        (colorLevel * typeLevel * myscLevel) / parts.Count() - 1.0f;
+        comboBonus = Mathf.Clamp(comboBonus, 0f, 3f);
+
+        GameSystem.self.comboTime += comboBonus;
+
+        calcDesc += "リザルト " + CalcScore;
         Debug.Log("CalcScore is " + CalcScore);
-        
+
     }
 
     //カラー種類数に応じたボーナス倍率
@@ -129,21 +160,25 @@ public class Manufacture : MonoBehaviour
         List<int> colors = new List<int>();
         foreach(Parts part in InsideParts)
         {
+            if(part.isTrash || part.color < 0)
+            {
+                continue;
+            }
             colors.Add(part.color);
             Debug.Log("col added : " + part.color );
         }
-        float colorScore;
+        float colorScore = 1f;
 
         isColorMirraged = false;
         //色が統一されている場合は、ボーナス点を加算する.
         if(colors.Distinct().Count() == 1)
         {
             Debug.Log("The PURE Archived");
-            calcDesc += "[PURE x4]" + '\n';
+            calcDesc += "[オソロイ!! x4]" + '\n';
             isColorMirraged = true;
             colorScore = 4f;
         }
-        else
+        else if(colors.Count() > 0)
         {
             //カラーの個別情報をリスト化.
             // colorNumsはcolorDistinctと同値のサイズを取るはず.
@@ -152,7 +187,7 @@ public class Manufacture : MonoBehaviour
             foreach(int cD in colorDistinct)
             {
                 //colorDistinctの値で個数を数える.
-                colorNums.Add(colors.Count(keys => keys == cD));
+                colorNums.Add(colors.Count(key => key == cD));
             }
 
             int MaxColors = colorNums.Max();
@@ -163,13 +198,13 @@ public class Manufacture : MonoBehaviour
             {
                 Debug.Log("The E-COLOR Archived");
                 colorScore = colorDistinct.Count * MaxColors;
-                calcDesc += string.Format("[E-COLOR x{0}]", colorDistinct.Count * MaxColors) + '\n';
+                calcDesc += string.Format("[イロイロ! x{0}]", colorDistinct.Count * MaxColors) + '\n';
             }
             else
             {
                 Debug.Log("MIX Archived");
                 colorScore = MinColors;
-                calcDesc += string.Format("[MIX x{0}]", MinColors) + '\n';
+                calcDesc += string.Format("[バラバラ x{0}]", MinColors) + '\n';
             }
             Debug.Log("ColorScore is " + colorScore);
         }
@@ -185,6 +220,10 @@ public class Manufacture : MonoBehaviour
         List<int> types = new List<int>();
         foreach(Parts part in InsideParts)
         {
+            if(part.isTrash || part.PartType < 0)
+            {
+                continue;
+            }
             types.Add(part.PartType);
             Debug.Log("partType added : " + part.PartType );
         }
@@ -196,11 +235,11 @@ public class Manufacture : MonoBehaviour
         if(types.Distinct().Count() == 1)
         {
             Debug.Log("The MIRRAGE Archived");
-            calcDesc += "[MIRRAGE x3]" + '\n';
+            calcDesc += "[ソックリ!! x3]" + '\n';
             isTypeMirraged = true;
             TypeScore = 3f;
         }
-        else
+        else if(types.Count() > 0)
         {
             //パーツの個別情報をリスト化.
             // colorNumsはcolorDistinctと同値のサイズを取るはず.
@@ -209,7 +248,7 @@ public class Manufacture : MonoBehaviour
             foreach(int pD in partsDistinct)
             {
                 //colorDistinctの値で個数を数える.
-                partsNums.Add(types.Count(keys => keys == pD));
+                partsNums.Add(types.Count(key => key == pD));
             }
 
             int MaxParts = partsNums.Max();
@@ -219,14 +258,14 @@ public class Manufacture : MonoBehaviour
             if(MaxParts == MinParts)
             {
                 Debug.Log("The DIVISION Archived");
-                calcDesc += string.Format("[DIVISION x{0}]", partsDistinct.Count() * 1.5f) + '\n';
+                calcDesc += string.Format("[キッチリ! x{0}]", partsDistinct.Count() * 1.5f) + '\n';
                 TypeScore = partsDistinct.Count() * 1.5f;
             }
             else
             {
                 Debug.Log("FRAGMENT Archived");
                 TypeScore = MinParts;
-                calcDesc += string.Format("[FRAGMENT x{0}]", MinParts) + '\n';
+                calcDesc += string.Format("[フゾロイ x{0}]", MinParts) + '\n';
            }
         }
         Debug.Log("PartsScore is " + TypeScore);
@@ -244,12 +283,16 @@ public class Manufacture : MonoBehaviour
 
         foreach(Parts part in InsideParts)
         {
+            if(part.isTrash || part.PartType < 0 || part.color < 0)
+            {
+                continue;
+            }
             types.Add(part.PartType);
             Debug.Log("Group partType added : " + part.PartType );
         }
 
         //パーツ内のカラーが唯一性を持っているか？
-        bool isGROUPUNITY = true;
+        bool isGROUPUNITY = types.Count() > 0;
         foreach (int p in types)
         {
             bool isAligned = true;
@@ -267,13 +310,13 @@ public class Manufacture : MonoBehaviour
         if (isColorMirraged && isTypeMirraged)
         {
             myscScore += 2f; // PURE MIRROR bonus
-            calcDesc += string.Format("PURE MIRROR x2]") + '\n';
+            calcDesc += string.Format("トウイツ?! x2]") + '\n';
             Debug.Log("The PURE MIRROR Archived");
         }
         else if (isGROUPUNITY)
         {
             myscScore += .5f * InsideParts.Count; // UNIFIED GROUP bonus
-            calcDesc += string.Format("UNIFIED GROUP x{0}]", myscScore) + '\n';
+            calcDesc += string.Format("ハッピー!!! x{0}]", myscScore) + '\n';
             Debug.Log("The UNIFIED GROUP Archived");
         }
 
@@ -319,6 +362,7 @@ public class Manufacture : MonoBehaviour
         {
             Destroy(part.gameObject);
         }
+        isPacking = false;
     }
 }
 

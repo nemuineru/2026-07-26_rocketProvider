@@ -1,10 +1,9 @@
-
-
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
+using UnityEngine.Splines;
 
 public class GameSystem : MonoBehaviour
 {
@@ -28,7 +27,6 @@ public class GameSystem : MonoBehaviour
     public List<AudioClip> PartSoundOnTouch;
     public List<AudioClip> PartSoundOnSelected;
 
-
     //現在の経過時間, 及びにレベル.
     public float timeElapsed;
 
@@ -37,6 +35,9 @@ public class GameSystem : MonoBehaviour
     //スコアと進行スピード.
     public int Score;
 
+    //次のレベルに上がるためのスコアの閾値.
+    public int NextLevelScore = 1000;
+
     public float speed = 1.0f;
     public float generatingRate = 1.0f;
 
@@ -44,7 +45,32 @@ public class GameSystem : MonoBehaviour
     internal float maxLimit = 100f;
     public float currentLimit = 0f;
 
+    //イキオイ状態の時間. これが0になるとコンボボーナスが切れる.
+    public float comboTime = 0f;
+
     public UISystem uiSystem;
+
+    public List<LevelData> levelDatas;
+
+    //工場配送・出荷ラインの指定
+    internal SplineContainer transportSpline, shippingSpline;
+
+    [System.Serializable]
+    public class LevelData
+    {
+        public int startLevel;
+        public float speed;
+        public float generatingRate;
+        public float maxLimit;
+        public List<Parts> generatingParts;
+
+        public LevelData(float speed, float generatingRate, float maxLimit)
+        {
+            this.speed = speed;
+            this.generatingRate = generatingRate;
+            this.maxLimit = maxLimit;
+        }
+    }
 
     //Static化
     void Awake()
@@ -77,17 +103,17 @@ public class GameSystem : MonoBehaviour
         InputInstance.self.InputUpdate();
 
         parts = parts.Where(i => i != null).ToList();
-        if(InputInstance.self.isClicked)
+        if (InputInstance.self.isClicked)
         {
             //Debug.Log("Click");
-            if(grabbingParts != null)
+            if (grabbingParts != null)
             {
                 grabbingParts.isGrabbed = true;
                 grabbingParts.OnGrabbed();
             }
-            
+
             //押した瞬間、ボタン押しの判定にする. また、パーツのグラブ判定もここで発生させる.
-            if(grabbingParts == null && InputInstance.self.clickingTime == 1)
+            if (grabbingParts == null && InputInstance.self.clickingTime == 1)
             {
                 GrabParts();
                 PushButton();
@@ -95,13 +121,15 @@ public class GameSystem : MonoBehaviour
         }
         else
         {
-            if(grabbingParts != null)
+            if (grabbingParts != null)
             {
                 grabbingParts.OnReleased();
                 grabbingParts.isGrabbed = false;
                 grabbingParts = null;
             }
         }
+        //0以上の時 コンボボーナスの時間を減らす.
+        comboTime -= comboTime > 0 ? Time.deltaTime : 0f;
     }
     
 
@@ -182,3 +210,4 @@ public class GameSystem : MonoBehaviour
     }
 
 }
+
