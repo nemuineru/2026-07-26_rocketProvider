@@ -79,3 +79,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 ProjectSettings/Packages/com.unity.probuilder/Settings.json
+
+# dont publish these files cause copyright issues
+/[Aa]ssets/MyAsset/Sounds/*

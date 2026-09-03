@@ -1,6 +1,5 @@
 
 
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,6 +20,7 @@ public class Parts : MonoBehaviour
     public int PartType;
     float yPos = 1f;
 
+    [SerializeField]
     //変換後の配送時間. Splineに沿って、また工場に送られる.
     internal float deliveryTime = 0f;
 
@@ -31,9 +31,13 @@ public class Parts : MonoBehaviour
     //レベルが上がるに連れ、基本スコアと大きさと重さが変わる.
     public int Level = 1;
 
-    public int HitPoint = 1;
+    public float HitPoint = 1;
 
-    MeshRenderer rend;
+    public float bpmDecreaseToValue = 1.0f;
+
+    MeshRenderer mainRenderer;
+
+    MeshFilter mainMeshFilter;
     public Manufacture CapturedBy;
     public Rigidbody rb;
     public Collider collider;
@@ -60,6 +64,7 @@ public class Parts : MonoBehaviour
 
 
     public bool isGrabbed = false;
+    public bool isConsuming = false;
 
 
     void OnCollisionEnter(Collision collision)
@@ -80,26 +85,72 @@ public class Parts : MonoBehaviour
         }
     }
 
+    public void setStatusNum(int color, int partType)
+    {
+        this.color = color;
+        this.PartType = partType;
+    }
+
+    public void settingParts()
+    {
+        mainRenderer.material = GameSystem.self.mats[color];
+        mainMeshFilter.mesh = GameSystem.self.partMeshes[PartType];
+    }
+
+    public void init()
+    {        
+        rb = GetComponent<Rigidbody>();
+        collider = GetComponent<Collider>();
+        mainRenderer = GetComponent<MeshRenderer>();
+        mainMeshFilter = GetComponent<MeshFilter>();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        collider = GetComponent<Collider>();
-        rend = GetComponent<MeshRenderer>();
+        init();
         if (!isTrash && color >= 0)
         {
-            rend.material = GameSystem.self.mats[color];
+            setStatusNum(color, PartType);
+            settingParts();
         }
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        //消費前のパーツはBPMの補正を掛けておく. GameSystem.self.OffsetTimeを使って、音楽の再生位置の補正もかける.
+        if(!isConsuming)
+        {
+            bpmDecreaseToValue = 1.0f 
+            + Mathf.Repeat(GameSystem.self.gameTime + GameSystem.self.bpmOffset, GameSystem.self.tempo / 60f * Time.fixedDeltaTime);
+        }
+
+        if(bpmDecreaseToValue < 0f)
+        {
+            GameObject effectInstance = Instantiate(componentEffect, transform.position, Quaternion.identity);
+            effectInstance.transform.localScale = Vector3.one * 2.0f;
+            bpmDecreaseToValue = 1.0f;
+            //大きいほど、HPの減少が遅くなる. つまり、レベルが高いほど、HPの減少が遅くなる.
+            //但し、大きくなりすぎないように.
+            float DecreaseValue = Mathf.Ceil((Level + 6) / 12f);
+            HitPoint -= (1.0f / Level) * DecreaseValue;
+            GameSystem.self.rhymeChain++;
+            GameSystem.self.grooveTime = 2.0f;
+    
+            float IncreasementValue = Mathf.Pow(Level, 0.5f) * 0.5f;
+
+            GameSystem.self.currentLimit += IncreasementValue;
+            GameSystem.self.Score += Mathf.RoundToInt(100f * IncreasementValue);
+        }
         //キャプチャーされているときは考慮しない.
         collider.enabled = !isGrabbed;
         rb.useGravity = !isGrabbed;
-        rb.mass = 1f + Level * 0.4f;
-        transform.localScale = Vector3.one * (1f + Level * 0.08f);
+        rb.mass = 1f + Mathf.Pow(Level, 0.25f) * 0.1f;
+        //キャプチャーされてたり、配送中の時は小さくする. それ以外はレベルに応じて大きくする.
+        //最大5倍スケール.
+        float targetScale = Mathf.Min((deliveryTime > 0f || CapturedBy != null) ? 0.7f : (1f + Mathf.Pow(Level, 0.75f) * 0.1f), 8f);
+        transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * targetScale, 0.1f);
         if (CapturedBy != null)
         {
             gameObject.layer = LayerMask.NameToLayer("CapturedEntity");
@@ -109,7 +160,7 @@ public class Parts : MonoBehaviour
             gameObject.layer = LayerMask.NameToLayer("Entity");
         }
 
-        if (CapturedBy != null || deliveryTime > 0f)
+        if (CapturedBy != null || deliveryTime > 0f || isConsuming)
         {
             gameObject.layer = LayerMask.NameToLayer("CapturedEntity");
             CaptureEffect.SetActive(true);
@@ -118,10 +169,11 @@ public class Parts : MonoBehaviour
             {
                 deliveryTime -= Time.deltaTime;
                 {
-                    GameSystem.self.transportSpline[0].Evaluate(deliveryTime,out float3 pos, out float3 tangent, out float3 upVect);
+                    float3 pos = GameSystem.self.transportSpline.EvaluatePosition(1 - deliveryTime);
                     Vector3 movePos = new Vector3(pos.x, pos.y, pos.z) - transform.position;
+                    rb.MovePosition(Vector3.Lerp(rb.position, transform.position + movePos, 0.1f));
                     rb.velocity =
-                    Vector3.Lerp(rb.velocity, movePos.normalized * 10f, 0.1f);
+                    Vector3.Lerp(rb.velocity, movePos, 0.1f);
                 }
             }
         }
@@ -133,17 +185,20 @@ public class Parts : MonoBehaviour
         
 
 
-        //何らかの原因で溶鉱炉に落ちなかったり、HPが0になった場合は削除する.
-        if (transform.position.y < -10f || HitPoint <= 0)
+        //キャプチャー時や食べさせてる時以外の要因で何らかの原因で溶鉱炉に落ちなかったりした時や、HPが0になった場合は削除する
+        if (((transform.position.y < -10f) && CapturedBy == null && deliveryTime <= 0f && !isConsuming) || HitPoint <= 0)
         {
-            GameSystem.self.currentLimit += 1f;
-            Deletation();
+            Deletation(HitPoint > 0);
         }
 
     }
 
-    public void Deletation()
+    public void Deletation(bool isPenalty = false)
     {
+        if (isPenalty)
+        {
+            GameSystem.self.currentLimit -= 1f;
+        }
         if (erasingEffect != null)
         {
             GameObject effect = Instantiate(erasingEffect, transform.position, Quaternion.identity);
@@ -175,13 +230,21 @@ public class Parts : MonoBehaviour
 
         foreach (var man in GameSystem.self.ManufacturerObjects)
         {
+            //平面距離で円柱内にいる時
             if
-            ((newPosition - man.transform.position).magnitude < man.range ||
-            (transform.position - man.transform.position).magnitude < man.range)
+            (Vector3.ProjectOnPlane(newPosition - man.transform.position, Vector3.up).magnitude < man.range ||
+            Vector3.ProjectOnPlane(transform.position - man.transform.position, Vector3.up).magnitude < man.range)
             {
                 CapturedBy = man;
                 man.InsideParts.Add(this);
             }
+        }
+
+        if(GameSystem.self.consumer != null && GameSystem.self.consumer.collectedParts.Count < GameSystem.self.consumer.MaxParts &&
+        Vector3.ProjectOnPlane(newPosition - GameSystem.self.consumer.transform.position, Vector3.up).magnitude < 3.0f)
+        {
+            GameSystem.self.consumer.collectedParts.Add(this);
+            isConsuming = true;
         }
     }
 
@@ -204,3 +267,4 @@ public class Parts : MonoBehaviour
         }
     }
 }
+

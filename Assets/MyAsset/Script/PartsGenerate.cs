@@ -23,6 +23,10 @@ public class PartsGenerate : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (GameSystem.self.gameTime < 0f)
+        {
+            return;
+        }
         timerMax = Mathf.Min(100f , 1.0f / (freqency + Mathf.Epsilon));
         if(timer > timerMax)
         {

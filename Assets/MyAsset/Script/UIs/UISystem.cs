@@ -12,6 +12,9 @@ public class UISystem : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI AddingScoreText;
 
+    public TextMeshProUGUI RhymeChainText;
+    public Image GrooveCircleImage;
+
     float CurrentScore = 0;
     // Start is called before the first frame update
     void Start()
@@ -24,6 +27,10 @@ public class UISystem : MonoBehaviour
     {
         CurrentScore = Mathf.Lerp(CurrentScore, GameSystem.self.Score, .2f);
         scoreText.text = CurrentScore.ToString("F0");
+        RhymeChainText.text = GameSystem.self.rhymeChain > 1 ? "Rhyme " + GameSystem.self.rhymeChain.ToString() : "";
+        float fills = GameSystem.self.grooveTime / 2.0f;
+        GrooveCircleImage.fillAmount =  Mathf.Pow(Mathf.Min(fills , 1f), 0.5f);
+        RhymeChainText.transform.localScale = Vector3.one * Mathf.Lerp(RhymeChainText.transform.localScale.x, fills > 0.95f ? 1.05f : 1f, .2f);
     }
 
     public void ShowAddingScore(string score)

@@ -7,8 +7,16 @@ using UnityEngine.Splines;
 
 public class GameSystem : MonoBehaviour
 {
+    //高レベルパーツ生成用のゲームオブジェクト
+    public GameObject PartPurePrefab;
+    public AudioSource IngameAudio;
+
     //必ず１つは付ける.
     public Material[] mats;
+    //必ず１つは付ける.
+    public Mesh[] partMeshes;
+
+    public GameObject SegmentParts;
 
     [SerializeField]
     static public GameSystem self;
@@ -27,6 +35,8 @@ public class GameSystem : MonoBehaviour
     public List<AudioClip> PartSoundOnTouch;
     public List<AudioClip> PartSoundOnSelected;
 
+    public Consumer consumer;
+
     //現在の経過時間, 及びにレベル.
     public float timeElapsed;
 
@@ -35,25 +45,36 @@ public class GameSystem : MonoBehaviour
     //スコアと進行スピード.
     public int Score;
 
+    //流している音楽のパラメータ. 及びにグルーヴ状態の管理.
+    public float tempo;
+    public float bpmOffset;
+    
+    
+    public int rhymeChain = 0;
+
+    //イキオイ状態の時間. これが0になるとコンボボーナスが切れる.
+    public float grooveTime;
+
     //次のレベルに上がるためのスコアの閾値.
     public int NextLevelScore = 1000;
 
     public float speed = 1.0f;
     public float generatingRate = 1.0f;
 
-    //currentLimitがmaxLimitを超えたらゲームオーバーにする.
+    //currentLimitが0を下回ったらゲームオーバーにする.
     internal float maxLimit = 100f;
-    public float currentLimit = 0f;
+    public float currentLimit = 100f;
 
-    //イキオイ状態の時間. これが0になるとコンボボーナスが切れる.
-    public float comboTime = 0f;
+
+    public float gameTime = -2.8f;
 
     public UISystem uiSystem;
 
     public List<LevelData> levelDatas;
 
+    [SerializeField]
     //工場配送・出荷ラインの指定
-    internal SplineContainer transportSpline, shippingSpline;
+    internal SplineContainer transportSpline;
 
     [System.Serializable]
     public class LevelData
@@ -92,44 +113,57 @@ public class GameSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        currentLimit = maxLimit;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        SetRay();
-        DebugView();
-        InputInstance.self.InputUpdate();
-
-        parts = parts.Where(i => i != null).ToList();
-        if (InputInstance.self.isClicked)
+        
+        gameTime += Time.fixedDeltaTime;
+        //ゲーム時間が0以上の時のみ、ゲームシステムを動かす.
+        if(gameTime > 0f)
         {
-            //Debug.Log("Click");
-            if (grabbingParts != null)
+            if(IngameAudio != null && !IngameAudio.isPlaying)
             {
-                grabbingParts.isGrabbed = true;
-                grabbingParts.OnGrabbed();
+                IngameAudio.Play();
             }
+            SetRay();
+            DebugView();
+            InputInstance.self.InputUpdate();
 
-            //押した瞬間、ボタン押しの判定にする. また、パーツのグラブ判定もここで発生させる.
-            if (grabbingParts == null && InputInstance.self.clickingTime == 1)
+            parts = parts.Where(i => i != null).ToList();
+            if (InputInstance.self.isClicked)
             {
-                GrabParts();
-                PushButton();
+                //Debug.Log("Click");
+                if (grabbingParts != null)
+                {
+                    grabbingParts.isGrabbed = true;
+                    grabbingParts.OnGrabbed();
+                }
+
+                //押した瞬間、ボタン押しの判定にする. また、パーツのグラブ判定もここで発生させる.
+                if (grabbingParts == null && InputInstance.self.clickingTime == 1)
+                {
+                    GrabParts();
+                    PushButton();
+                }
             }
-        }
-        else
-        {
-            if (grabbingParts != null)
+            else
             {
-                grabbingParts.OnReleased();
-                grabbingParts.isGrabbed = false;
-                grabbingParts = null;
+                if (grabbingParts != null)
+                {
+                    grabbingParts.OnReleased();
+                    grabbingParts.isGrabbed = false;
+                    grabbingParts = null;
+                }
             }
+            grooveTime -= Time.fixedDeltaTime;
+            grooveTime = Mathf.Max(grooveTime, 0f);
+            rhymeChain = grooveTime > 0f ? rhymeChain : 0;
+            //時間経過で緩やかに.
+            currentLimit -= Time.fixedDeltaTime * Level;
         }
-        //0以上の時 コンボボーナスの時間を減らす.
-        comboTime -= comboTime > 0 ? Time.deltaTime : 0f;
     }
     
 
@@ -162,6 +196,8 @@ public class GameSystem : MonoBehaviour
             Parts HitPart = hitInfo.collider.gameObject.GetComponent<Parts>();
             if(HitPart != null)
             {
+                //配送中のモノはグラブできない. 使用中のも同様.
+                if (HitPart.deliveryTime > 0f || HitPart.isConsuming) return;
                 //得点源にならないものをクリックした時はHPを減らす.
                 if (HitPart.isTrash)
                 {
