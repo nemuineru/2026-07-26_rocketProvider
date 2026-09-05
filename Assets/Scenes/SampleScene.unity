@@ -1504,7 +1504,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: f4e11d0bd728fad44b0e55e0ba50772b, type: 3}
+  m_audioClip: {fileID: 8300000, guid: cf9c713320dd13f4eaeaa57a7f0e4051, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.2
   m_Pitch: 1
@@ -2797,11 +2797,12 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 8ae7980432605f44abca8cac2fc0a530, type: 3}
   PartSoundOnSelected:
   - {fileID: 8300000, guid: 05bd12e44776740419e896759ab9fcf9, type: 3}
+  LevelUpSound: {fileID: 0}
   consumer: {fileID: 803406375}
   timeElapsed: 0
   Level: 1
   Score: 0
-  tempo: 85
+  tempo: 120
   bpmOffset: 0
   rhymeChain: 0
   grooveTime: 0
@@ -2815,7 +2816,8 @@ MonoBehaviour:
   - startLevel: 0
     speed: 0
     generatingRate: 0
-    maxLimit: 0
+    limitDecreasingRate: 0
+    missedDecreaseMultiplier: 0
     generatingParts:
     - {fileID: 0}
   transportSpline: {fileID: 1579356432}

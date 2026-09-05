@@ -70,6 +70,10 @@ public class Consumer : MonoBehaviour
                     HeadPos = transform.position + Vector3.up * 8f;
                     part.bpmDecreaseToValue -= baseDecreasement * BeatRatio;
                 }
+                else
+                {
+                    part.bpmDecreaseToValue = 1.0f;
+                }
                 part.transform.position = Vector3.Lerp(part.transform.position, HeadPos, 0.5f);
                 part.transform.localScale = Vector3.one * 1f;
                 part.rb.velocity = Vector3.Lerp(part.rb.velocity, Vector3.zero, 0.5f);

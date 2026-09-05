@@ -120,10 +120,11 @@ public class Parts : MonoBehaviour
     void FixedUpdate()
     {
         //消費前のパーツはBPMの補正を掛けておく. GameSystem.self.OffsetTimeを使って、音楽の再生位置の補正もかける.
+        //減少量に関して、Rhymeコンボ5+になるまでは1->2->3->4->5の順で増加していく.
         if(!isConsuming)
         {
             bpmDecreaseToValue = 1.0f 
-            + Mathf.Repeat(GameSystem.self.gameTime + GameSystem.self.bpmOffset, GameSystem.self.tempo / 60f * Time.fixedDeltaTime);
+            + ((GameSystem.self.IngameAudio.time - GameSystem.self.audioOffset) * (GameSystem.self.tempo / 60f)) % 1.0f;
         }
 
         if(bpmDecreaseToValue < 0f)
@@ -133,7 +134,7 @@ public class Parts : MonoBehaviour
             bpmDecreaseToValue = 1.0f;
             //大きいほど、HPの減少が遅くなる. つまり、レベルが高いほど、HPの減少が遅くなる.
             //但し、大きくなりすぎないように.
-            float DecreaseValue = Mathf.Ceil((Level + 6) / 12f);
+            float DecreaseValue = Mathf.Min(GameSystem.self.rhymeChain, 5);
             HitPoint -= (1.0f / Level) * DecreaseValue;
             GameSystem.self.rhymeChain++;
             GameSystem.self.grooveTime = 2.0f;

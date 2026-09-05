@@ -1,3 +1,5 @@
+
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +37,8 @@ public class GameSystem : MonoBehaviour
     public List<AudioClip> PartSoundOnTouch;
     public List<AudioClip> PartSoundOnSelected;
 
+    public AudioSource LevelUpSound;
+
     public Consumer consumer;
 
     //現在の経過時間, 及びにレベル.
@@ -47,7 +51,7 @@ public class GameSystem : MonoBehaviour
 
     //流している音楽のパラメータ. 及びにグルーヴ状態の管理.
     public float tempo;
-    public float bpmOffset;
+    public float audioOffset;
     
     
     public int rhymeChain = 0;
@@ -79,17 +83,28 @@ public class GameSystem : MonoBehaviour
     [System.Serializable]
     public class LevelData
     {
+        //レベルの最小スタート地点
         public int startLevel;
+
+        //ベルトの進むスピード
         public float speed;
+
+        //パーツ生成レート
         public float generatingRate;
-        public float maxLimit;
+
+        //自然減少するリミット値レート
+        public float limitDecreasingRate;
+
+        //見逃し減少値の倍数値
+        public float missedDecreaseMultiplier;
+
+        //生成されるパーツのリスト
         public List<Parts> generatingParts;
 
-        public LevelData(float speed, float generatingRate, float maxLimit)
+        public LevelData(float speed, float generatingRate)
         {
             this.speed = speed;
             this.generatingRate = generatingRate;
-            this.maxLimit = maxLimit;
         }
     }
 
@@ -118,8 +133,16 @@ public class GameSystem : MonoBehaviour
 
     // Update is called once per frame
     void FixedUpdate()
-    {
-        
+    {        
+        float levelProgression = 3000f;
+        //3000点毎にレベルアップ.
+        int newLevel = 1 + Mathf.FloorToInt(Score / levelProgression);
+        if(newLevel > Level)
+        {
+            LevelUpSound.Play();
+        }
+        Level = newLevel;
+
         gameTime += Time.fixedDeltaTime;
         //ゲーム時間が0以上の時のみ、ゲームシステムを動かす.
         if(gameTime > 0f)
