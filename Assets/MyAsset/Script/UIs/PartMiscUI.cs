@@ -26,7 +26,7 @@ public class PartMiscUI : MonoBehaviour
         }
         else if(part.isConsuming)
         {
-            textMeshPro.text = Mathf.RoundToInt((part.HitPoint / 1.0f) * part.Level).ToString();
+            textMeshPro.text = part.HitPoint.ToString();
         }
         //普通のパーツのレベルは1なので、レベルが1の時は表示しない.
         else

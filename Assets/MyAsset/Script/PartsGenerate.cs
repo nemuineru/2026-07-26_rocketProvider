@@ -27,6 +27,7 @@ public class PartsGenerate : MonoBehaviour
         {
             return;
         }
+        freqency = GameSystem.self.generatingRate;
         timerMax = Mathf.Min(100f , 1.0f / (freqency + Mathf.Epsilon));
         if(timer > timerMax)
         {

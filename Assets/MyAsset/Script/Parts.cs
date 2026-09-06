@@ -31,9 +31,9 @@ public class Parts : MonoBehaviour
     //レベルが上がるに連れ、基本スコアと大きさと重さが変わる.
     public int Level = 1;
 
-    public float HitPoint = 1;
+    public int HitPoint = 1;
 
-    public float bpmDecreaseToValue = 1.0f;
+    public int beatStart = 0;
 
     MeshRenderer mainRenderer;
 
@@ -65,6 +65,9 @@ public class Parts : MonoBehaviour
 
     public bool isGrabbed = false;
     public bool isConsuming = false;
+    public bool isDelivered = false;
+
+    public bool isDamaging = false;
 
 
     void OnCollisionEnter(Collision collision)
@@ -95,7 +98,7 @@ public class Parts : MonoBehaviour
     {
         mainRenderer.material = GameSystem.self.mats[color];
         mainMeshFilter.mesh = GameSystem.self.partMeshes[PartType];
-    }
+    } 
 
     public void init()
     {        
@@ -123,26 +126,27 @@ public class Parts : MonoBehaviour
         //減少量に関して、Rhymeコンボ5+になるまでは1->2->3->4->5の順で増加していく.
         if(!isConsuming)
         {
-            bpmDecreaseToValue = 1.0f 
-            + ((GameSystem.self.IngameAudio.time - GameSystem.self.audioOffset) * (GameSystem.self.tempo / 60f)) % 1.0f;
+            HitPoint = Level;
+            beatStart = 
+            Mathf.FloorToInt((GameSystem.self.exactMusicTime - GameSystem.self.audioOffset) /
+             (60f / GameSystem.self.tempo));
         }
-
-        if(bpmDecreaseToValue < 0f)
+        else if(isDamaging)
         {
             GameObject effectInstance = Instantiate(componentEffect, transform.position, Quaternion.identity);
             effectInstance.transform.localScale = Vector3.one * 2.0f;
-            bpmDecreaseToValue = 1.0f;
             //大きいほど、HPの減少が遅くなる. つまり、レベルが高いほど、HPの減少が遅くなる.
             //但し、大きくなりすぎないように.
-            float DecreaseValue = Mathf.Min(GameSystem.self.rhymeChain, 5);
-            HitPoint -= (1.0f / Level) * DecreaseValue;
+            float DecreaseValue = Mathf.Min(GameSystem.self.rhymeChain + 1, 4);
+            HitPoint -= (int)DecreaseValue;
             GameSystem.self.rhymeChain++;
-            GameSystem.self.grooveTime = 2.0f;
+            GameSystem.self.grooveTime += Mathf.Min(Level / DecreaseValue , 8f) * GameSystem.self.bpmCaclRate;
     
-            float IncreasementValue = Mathf.Pow(Level, 0.5f) * 0.5f;
+            float chillingValue = Mathf.Pow(Level, 0.5f) * 2f;
 
-            GameSystem.self.currentLimit += IncreasementValue;
-            GameSystem.self.Score += Mathf.RoundToInt(100f * IncreasementValue);
+            GameSystem.self.currentLimit -= chillingValue;
+            GameSystem.self.Score += Mathf.RoundToInt(100f * chillingValue);
+            isDamaging = false;
         }
         //キャプチャーされているときは考慮しない.
         collider.enabled = !isGrabbed;
@@ -161,7 +165,7 @@ public class Parts : MonoBehaviour
             gameObject.layer = LayerMask.NameToLayer("Entity");
         }
 
-        if (CapturedBy != null || deliveryTime > 0f || isConsuming)
+        if (CapturedBy != null || deliveryTime > 0f || isDelivered)
         {
             gameObject.layer = LayerMask.NameToLayer("CapturedEntity");
             CaptureEffect.SetActive(true);
@@ -198,7 +202,7 @@ public class Parts : MonoBehaviour
     {
         if (isPenalty)
         {
-            GameSystem.self.currentLimit -= 1f;
+            GameSystem.self.currentLimit += 5f;
         }
         if (erasingEffect != null)
         {
@@ -241,11 +245,14 @@ public class Parts : MonoBehaviour
             }
         }
 
+        Bounds consumerBoundary = new Bounds(GameSystem.self.consumer.boundary.center, GameSystem.self.consumer.boundary.size);
+        consumerBoundary.center += GameSystem.self.consumer.transform.position;
+
         if(GameSystem.self.consumer != null && GameSystem.self.consumer.collectedParts.Count < GameSystem.self.consumer.MaxParts &&
-        Vector3.ProjectOnPlane(newPosition - GameSystem.self.consumer.transform.position, Vector3.up).magnitude < 3.0f)
+        (consumerBoundary.ClosestPoint(transform.position) - transform.position).magnitude < 0.1f)
         {
             GameSystem.self.consumer.collectedParts.Add(this);
-            isConsuming = true;
+            isDelivered = true;
         }
     }
 

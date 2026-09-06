@@ -26,6 +26,15 @@ public class Consumer : MonoBehaviour
     [SerializeField]
     GameObject Gateways;
 
+    [SerializeField]
+    public Bounds boundary;
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(boundary.center + transform.position, boundary.size);
+    }
+
     void Start()
     {
         animator = GetComponent<Animator>();
@@ -39,6 +48,10 @@ public class Consumer : MonoBehaviour
 
     void FixedUpdate()
     {
+        int beatMatch = 
+            Mathf.FloorToInt((GameSystem.self.exactMusicTime - GameSystem.self.audioOffset) /
+             (60f / GameSystem.self.tempo));
+        
         if(Gateways != null)
         {
             Gateways.SetActive(collectedParts.Count >= MaxParts);
@@ -65,14 +78,19 @@ public class Consumer : MonoBehaviour
                 Vector3 HeadPos = splineContainer.EvaluatePosition(((float)index_Parts + 1f) / collectedParts.Count);
                 if(index_Parts == 0)
                 {
+                    part.isConsuming = true;
+                    if(part.beatStart < beatMatch)
+                    {
+                        part.isDamaging = true;
+                        part.beatStart = beatMatch;
+                    }
                     //音楽のBPMに合わせて、消費するパーツのHPを増減. BPMが早いほど、HP消費は早くなる. 及びにスコアを加算する. 音楽再生位置の補正もかける.
                     float baseDecreasement = GameSystem.self.tempo / 60f * Time.fixedDeltaTime;
                     HeadPos = transform.position + Vector3.up * 8f;
-                    part.bpmDecreaseToValue -= baseDecreasement * BeatRatio;
                 }
                 else
                 {
-                    part.bpmDecreaseToValue = 1.0f;
+                    part.isDamaging = false;
                 }
                 part.transform.position = Vector3.Lerp(part.transform.position, HeadPos, 0.5f);
                 part.transform.localScale = Vector3.one * 1f;

@@ -41,6 +41,7 @@ public class BeltMovement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        Speed = GameSystem.self.speed;
         calcSpeed = Mathf.Lerp(calcSpeed, Speed * (GameSystem.self.gameTime > 0f ? 1f : 0.1f),0.1f);
         CurrentVal += calcSpeed * Time.fixedDeltaTime;
         material.mainTextureOffset = Vector2.up * (CurrentVal / MaterialLength);

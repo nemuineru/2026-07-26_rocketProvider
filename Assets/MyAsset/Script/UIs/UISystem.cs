@@ -9,13 +9,16 @@ using UnityEngine.SocialPlatforms.Impl;
 
 public class UISystem : MonoBehaviour
 {
+    public TextMeshProUGUI levelText;
     public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI nextScoreText;
     public TextMeshProUGUI AddingScoreText;
 
     public TextMeshProUGUI RhymeChainText;
     public Image GrooveCircleImage;
 
     float CurrentScore = 0;
+    float NextScore = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -26,9 +29,14 @@ public class UISystem : MonoBehaviour
     void Update()
     {
         CurrentScore = Mathf.Lerp(CurrentScore, GameSystem.self.Score, .2f);
-        scoreText.text = CurrentScore.ToString("F0");
+        NextScore = Mathf.Max(NextScore, GameSystem.self.Level * 10000);
+
+        levelText.text = "LEVEL " + GameSystem.self.Level.ToString("D2");
+        scoreText.text = "PTS " + ((int)CurrentScore).ToString("D8");
+        nextScoreText.text = "NXT " + ((int)NextScore).ToString("D8");
+
         RhymeChainText.text = GameSystem.self.rhymeChain > 1 ? "Rhyme " + GameSystem.self.rhymeChain.ToString() : "";
-        float fills = GameSystem.self.grooveTime / 2.0f;
+        float fills = GameSystem.self.grooveTime / GameSystem.self.grooveTimeMax;
         GrooveCircleImage.fillAmount =  Mathf.Pow(Mathf.Min(fills , 1f), 0.5f);
         RhymeChainText.transform.localScale = Vector3.one * Mathf.Lerp(RhymeChainText.transform.localScale.x, fills > 0.95f ? 1.05f : 1f, .2f);
     }

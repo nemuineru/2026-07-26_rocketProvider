@@ -1,5 +1,3 @@
-
-
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,6 +56,7 @@ public class GameSystem : MonoBehaviour
 
     //イキオイ状態の時間. これが0になるとコンボボーナスが切れる.
     public float grooveTime;
+    public float grooveTimeMax = 4.0f;
 
     //次のレベルに上がるためのスコアの閾値.
     public int NextLevelScore = 1000;
@@ -65,9 +64,14 @@ public class GameSystem : MonoBehaviour
     public float speed = 1.0f;
     public float generatingRate = 1.0f;
 
-    //currentLimitが0を下回ったらゲームオーバーにする.
+    //currentLimitが100となったあと、デンジャーカウントが始まる.
+    //デンジャーカウントが0になるとゲームオーバー. 一度でも100以下になれば徐々にデンジャーカウントは減少する.
     internal float maxLimit = 100f;
-    public float currentLimit = 100f;
+    public float minLimit = 0f;
+    public float currentLimit = 0f;
+
+    float dangerCountMax = 10;
+    public float dangerCount = 0;
 
 
     public float gameTime = -2.8f;
@@ -79,6 +83,12 @@ public class GameSystem : MonoBehaviour
     [SerializeField]
     //工場配送・出荷ラインの指定
     internal SplineContainer transportSpline;
+
+    public float bpmCaclRate = 1.0f;
+    public float exactMusicTime = 1.0f;
+
+    public int currentBeatNum;
+
 
     [System.Serializable]
     public class LevelData
@@ -128,13 +138,15 @@ public class GameSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        currentLimit = maxLimit;
+        currentLimit = 0;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {        
-        float levelProgression = 3000f;
+        bpmCaclRate = 60f / tempo;
+        currentBeatNum = Mathf.CeilToInt((exactMusicTime - audioOffset) / (60f / tempo));
+        float levelProgression = 10000f;
         //3000点毎にレベルアップ.
         int newLevel = 1 + Mathf.FloorToInt(Score / levelProgression);
         if(newLevel > Level)
@@ -181,11 +193,25 @@ public class GameSystem : MonoBehaviour
                     grabbingParts = null;
                 }
             }
-            grooveTime -= Time.fixedDeltaTime;
-            grooveTime = Mathf.Max(grooveTime, 0f);
+            grooveTime -= Time.fixedDeltaTime * bpmCaclRate;
+            grooveTime = Mathf.Clamp(grooveTime, 0f, grooveTimeMax);
+            
             rhymeChain = grooveTime > 0f ? rhymeChain : 0;
             //時間経過で緩やかに.
-            currentLimit -= Time.fixedDeltaTime * Level;
+            currentLimit += Time.fixedDeltaTime * Level * .25f;
+            currentLimit = Mathf.Clamp(currentLimit, minLimit, maxLimit);
+            //現在の再生位置の正確な時間を取得.
+            exactMusicTime = (float)IngameAudio.timeSamples / IngameAudio.clip.frequency;
+        }
+
+        if(currentLimit >= maxLimit)
+        {
+            dangerCount -= Time.fixedDeltaTime / bpmCaclRate;
+        }
+        else
+        {
+            dangerCount += Time.fixedDeltaTime / bpmCaclRate * .5f;
+            dangerCount = Mathf.Clamp(dangerCount, 0f, 10f);
         }
     }
     

@@ -51,5 +51,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "2026-07-26_rocketProvider.sln"
+    "dotnet.defaultSolution": "2026-07-26_rocketProvider_B_Up_test.sln"
 }
