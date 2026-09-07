@@ -16,7 +16,7 @@ public class Manufacture : MonoBehaviour
 
     //瓶詰めオブジェクト
     [SerializeField]
-    public GameObject PackagePrefab;
+    public GameObject NormalPackage, CriticalPackage;
     
     [SerializeField]
     public GameObject UIPrefab;
@@ -33,6 +33,12 @@ public class Manufacture : MonoBehaviour
 
     bool isPacking = false;
 
+    //何拍で圧縮を実行するかを決定.
+    //４拍ごとに、パッケージング.
+    int BeatTo = 4;
+    int BeatOffSet = 0;
+    int BeatRecorded = 0;
+
     internal List<Parts> InsideParts = new List<Parts>();
     // Start is called before the first frame update
     void Start()
@@ -43,29 +49,35 @@ public class Manufacture : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        foreach(Parts p in InsideParts)
+        foreach (Parts p in InsideParts)
         {
-            if(p != null)
+            if (p != null)
             {
-                p.SemiGraviTowards(GravPower,range,colliderIgnorementRange);                
+                p.SemiGraviTowards(GravPower, range, colliderIgnorementRange);
             }
         }
         InsideParts = InsideParts.Where
         (p => p != null && p.isGrabbed == false).ToList();
+        // // Packing is triggered every BeatTo beats.
+        // if (GameSystem.self != null && (GameSystem.self.currentBeatNum - BeatOffSet) % BeatTo == 0)
+        // {
+        //     Packing();
+        // }
     }
 
     //圧縮再配送スクリプト
-    public void Packing()
+    public void Packing(bool isCritical = false)
     {
-        if (InsideParts.Count > 0 && !isPacking)
+        Instantiate(isCritical ? CriticalPackage : NormalPackage, transform.position - transform.up * 2f, Quaternion.identity);
+        if (InsideParts.Count > 0 && !isPacking && BeatRecorded != GameSystem.self.currentBeatNum)
         {
             calcDesc = "";
             Debug.Log("Packing initiated");
             isPacking = true;
-            Instantiate(PackagePrefab, transform.position - transform.up * 2f, Quaternion.identity);
+            BeatRecorded = GameSystem.self.currentBeatNum;
             Parts resultPart;
             GameObject instPart;
-            resultPart = CalculateParts(InsideParts);
+            resultPart = CalculateParts(InsideParts, isCritical);
             //パッケージアニメーションスタート.
             StartCoroutine(PackAnim(resultPart));
             GameSystem.self.uiSystem.ShowAddingScore(calcDesc);
@@ -88,7 +100,7 @@ public class Manufacture : MonoBehaviour
     //集めたパーツの等分性や統一性を計算し、ポイントとして出す.
     //〇〇 : △△ : ◇◇ で全一色の場合、☆型の統一された色で排出され、LVはボーナスを加味して10程.
     //返り値として生成されたパーツを返すように変更.
-    public Parts CalculateParts(List<Parts> parts)
+    public Parts CalculateParts(List<Parts> parts, bool isCritical = false)
     {
         Parts resultPart = new Parts();
         float CalcLevel = 0f;
@@ -143,7 +155,7 @@ public class Manufacture : MonoBehaviour
             //resultPartの一部パラメータをSelectPartのパラメータに合わせる.
             resultPart.baseScore = SelectPart.baseScore;
             resultPart.HitPoint = SelectPart.HitPoint;
-            resultPart.Level = Mathf.CeilToInt(CalcLevel);
+            resultPart.Level = Mathf.CeilToInt(CalcLevel) + (isCritical ? 2 : 0);
             resultPart.PartType = mostPart;
             resultPart.color = mostColor;
         }
@@ -405,3 +417,4 @@ public class Manufacture : MonoBehaviour
         isPacking = false;
     }
 }
+

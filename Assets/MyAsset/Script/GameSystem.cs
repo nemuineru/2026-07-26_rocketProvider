@@ -1,3 +1,5 @@
+
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,12 @@ public class GameSystem : MonoBehaviour
 {
     //高レベルパーツ生成用のゲームオブジェクト
     public GameObject PartPurePrefab;
+
+    //キャプチャーリングプレハブと生成済みのオブジェクトの管理.
+    public PartsCapture CaptureRingPrefab;
+    PartsCapture CaptureRingInstance;
+    public Transform captureRingPos;
+
     public AudioSource IngameAudio;
 
     //必ず１つは付ける.
@@ -50,6 +58,7 @@ public class GameSystem : MonoBehaviour
     //流している音楽のパラメータ. 及びにグルーヴ状態の管理.
     public float tempo;
     public float audioOffset;
+    public float audioLoopPointTime;
     
     
     public int rhymeChain = 0;
@@ -87,7 +96,7 @@ public class GameSystem : MonoBehaviour
     public float bpmCaclRate = 1.0f;
     public float exactMusicTime = 1.0f;
 
-    public int currentBeatNum;
+    public int currentBeatNum, recorededBeatNum = 0;
 
 
     [System.Serializable]
@@ -139,13 +148,12 @@ public class GameSystem : MonoBehaviour
     void Start()
     {
         currentLimit = 0;
+        PrepareCaptureRing();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {        
-        bpmCaclRate = 60f / tempo;
-        currentBeatNum = Mathf.CeilToInt((exactMusicTime - audioOffset) / (60f / tempo));
         float levelProgression = 10000f;
         //3000点毎にレベルアップ.
         int newLevel = 1 + Mathf.FloorToInt(Score / levelProgression);
@@ -157,9 +165,9 @@ public class GameSystem : MonoBehaviour
 
         gameTime += Time.fixedDeltaTime;
         //ゲーム時間が0以上の時のみ、ゲームシステムを動かす.
-        if(gameTime > 0f)
+        if (gameTime > 0f)
         {
-            if(IngameAudio != null && !IngameAudio.isPlaying)
+            if (IngameAudio != null && !IngameAudio.isPlaying)
             {
                 IngameAudio.Play();
             }
@@ -176,32 +184,58 @@ public class GameSystem : MonoBehaviour
                     grabbingParts.isGrabbed = true;
                     grabbingParts.OnGrabbed();
                 }
+                else if(CaptureRingInstance != null && CaptureRingInstance.isCaptureReady)
+                {
+                    CaptureRingInstance.OnGrabbed();
+                }
 
                 //押した瞬間、ボタン押しの判定にする. また、パーツのグラブ判定もここで発生させる.
                 if (grabbingParts == null && InputInstance.self.clickingTime == 1)
                 {
                     GrabParts();
-                    PushButton();
+                    GetCaptureRing();
                 }
             }
+            //左クリックが離された瞬間の処理.
             else
             {
+                //持ち物が有るなら..
                 if (grabbingParts != null)
                 {
                     grabbingParts.OnReleased();
                     grabbingParts.isGrabbed = false;
                     grabbingParts = null;
                 }
+                // キャプチャリングの準備ができている場合の処理. 
+                if(CaptureRingInstance.isCaptureReady)
+                {
+                    CaptureRingInstance.isButtonReleased = true;
+                    CaptureRingInstance = null;
+                    PrepareCaptureRing();
+                }
             }
+            CaptureRingInstance.gameObject.transform.localScale = Vector3.Lerp(CaptureRingInstance.gameObject.transform.localScale, Vector3.one, Time.fixedDeltaTime * 5f);
+            
             grooveTime -= Time.fixedDeltaTime * bpmCaclRate;
             grooveTime = Mathf.Clamp(grooveTime, 0f, grooveTimeMax);
-            
+
             rhymeChain = grooveTime > 0f ? rhymeChain : 0;
-            //時間経過で緩やかに.
-            currentLimit += Time.fixedDeltaTime * Level * .25f;
+            //時間経過で緩やかに. 但しrhymeChainが1以上の時は進行しない。
+            if (rhymeChain == 0)
+            {
+                currentLimit += Time.fixedDeltaTime * Level * .25f;
+            }
             currentLimit = Mathf.Clamp(currentLimit, minLimit, maxLimit);
+
             //現在の再生位置の正確な時間を取得.
             exactMusicTime = (float)IngameAudio.timeSamples / IngameAudio.clip.frequency;
+            bpmCaclRate = 60f / tempo;
+            if (exactMusicTime < audioLoopPointTime)
+            {
+                recorededBeatNum = currentBeatNum;
+            }
+            currentBeatNum = recorededBeatNum + Mathf.CeilToInt((exactMusicTime - audioOffset) / (60f / tempo));
+            audioLoopPointTime = exactMusicTime;
         }
 
         if(currentLimit >= maxLimit)
@@ -230,6 +264,11 @@ public class GameSystem : MonoBehaviour
         {
             MainRay = mainCam.ScreenPointToRay(InputInstance.self.position);
         }
+    }
+    void PrepareCaptureRing()
+    {
+        GameObject captureRingObj = Instantiate(CaptureRingPrefab.gameObject, captureRingPos.position, Quaternion.identity);
+        CaptureRingInstance = captureRingObj.GetComponent<PartsCapture>();
     }
     
     void GrabParts()
@@ -267,22 +306,14 @@ public class GameSystem : MonoBehaviour
         }
     }
 
-    void PushButton()
+    void GetCaptureRing()
     {
         LayerMask aMask = LayerMask.GetMask("Button");
         bool hitInfos = Physics.Raycast(MainRay,out RaycastHit hitInfo_PB, 50f , aMask);
 
-
-        if(hitInfos)
+        if(hitInfos && CaptureRingInstance != null)
         {
-            Debug.Log("Functioning PushButton - " + hitInfo_PB.collider.gameObject.name);
-            InteractableButton interactable = hitInfo_PB.collider.gameObject.GetComponent<InteractableButton>();
-            if(interactable != null)
-            {
-                interactable.SendMessage("OnInteract");
-                Debug.Log("Hit Button : " + interactable.name);
-                Debug.Log("Hit Button Layer : " + LayerMask.LayerToName(interactable.gameObject.layer));
-            }
+            CaptureRingInstance.ReadyCapture();
         }
     }    
 
@@ -294,5 +325,13 @@ public class GameSystem : MonoBehaviour
         Debug.DrawLine(MainRay.origin, MainRay.origin + Vector3.up, Color.red);
     }
 
+    internal bool CheckBeatInSync(float Duration)
+    {
+        int currentBeat = self.currentBeatNum - 1;
+        float beatTime = 60f / self.tempo;
+        float exactMusicTime = self.exactMusicTime - self.audioOffset;
+        float beatPosition = exactMusicTime / beatTime;
+        //Debug.Log("Beat Position: " + beatPosition + " Current Beat: " + (currentBeat - 1));
+        return Mathf.Abs(beatPosition - currentBeat) <= Duration;
+    }
 }
-

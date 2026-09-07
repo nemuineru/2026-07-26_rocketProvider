@@ -72,7 +72,8 @@ public class Parts : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (GameSystem.self.PartSoundOnTouch.Count > 0)
+        //Rarely play the touch sound
+        if (GameSystem.self.PartSoundOnTouch.Count > 0 && UnityEngine.Random.value > 0.8f)
         {
             AudioSource.PlayClipAtPoint
             (GameSystem.self.PartSoundOnTouch[UnityEngine.Random.Range(0, GameSystem.self.PartSoundOnTouch.Count)], transform.position);
