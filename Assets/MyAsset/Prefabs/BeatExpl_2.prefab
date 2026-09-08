@@ -4762,7 +4762,7 @@ GameObject:
   - component: {fileID: 8258632}
   - component: {fileID: -6145796624435642851}
   m_Layer: 0
-  m_Name: BeatExpl
+  m_Name: BeatExpl_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9683,7 +9683,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: b8d6d650c8a7da94f8a3d561f821c603, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0

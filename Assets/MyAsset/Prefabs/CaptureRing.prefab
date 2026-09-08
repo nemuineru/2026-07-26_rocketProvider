@@ -115,7 +115,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e338c5e78d7964545bb7512864777c78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BeatEffInstance: {fileID: 128324, guid: 077814232a600334aab65eaa8c0d38cf, type: 3}
+  BeatEffInstance:
+  - {fileID: 128324, guid: 077814232a600334aab65eaa8c0d38cf, type: 3}
+  - {fileID: 128324, guid: 9ae8ed254acdd9740a1c9958158c90ce, type: 3}
 --- !u!95 &7337175477727021262
 Animator:
   serializedVersion: 5

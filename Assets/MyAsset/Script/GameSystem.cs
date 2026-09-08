@@ -234,7 +234,7 @@ public class GameSystem : MonoBehaviour
             {
                 recorededBeatNum = currentBeatNum;
             }
-            currentBeatNum = recorededBeatNum + Mathf.CeilToInt((exactMusicTime - audioOffset) / (60f / tempo));
+            currentBeatNum = recorededBeatNum + Mathf.Max(0, Mathf.FloorToInt((exactMusicTime - audioOffset) / (60f / tempo)));
             audioLoopPointTime = exactMusicTime;
         }
 
@@ -327,7 +327,7 @@ public class GameSystem : MonoBehaviour
 
     internal bool CheckBeatInSync(float Duration)
     {
-        int currentBeat = self.currentBeatNum - 1;
+        int currentBeat = self.currentBeatNum - self.recorededBeatNum;
         float beatTime = 60f / self.tempo;
         float exactMusicTime = self.exactMusicTime - self.audioOffset;
         float beatPosition = exactMusicTime / beatTime;

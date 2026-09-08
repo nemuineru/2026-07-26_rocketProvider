@@ -128,9 +128,7 @@ public class Parts : MonoBehaviour
         if(!isConsuming)
         {
             HitPoint = Level;
-            beatStart = 
-            Mathf.FloorToInt((GameSystem.self.exactMusicTime - GameSystem.self.audioOffset) /
-             (60f / GameSystem.self.tempo));
+            beatStart = GameSystem.self.currentBeatNum;
         }
         else if(isDamaging)
         {

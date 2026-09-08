@@ -9,10 +9,11 @@ public class PartsCapture : MonoBehaviour
     float yPos = 1f;
     float ErasingTime = 0.4f;
     
+    [SerializeField]
     int BeatRecorded = 0;
 
     [SerializeField]
-    GameObject BeatEffInstance;
+    List<GameObject> BeatEffInstance;
 
     Animator animator;
     // Start is called before the first frame update
@@ -33,9 +34,10 @@ public class PartsCapture : MonoBehaviour
             }
             ErasingTime -= Time.deltaTime;
         }
-        else if(BeatRecorded != GameSystem.self.currentBeatNum && GameSystem.self.currentBeatNum % 2 == 0)
+        else if(BeatRecorded != GameSystem.self.currentBeatNum)
         {
-            Instantiate(BeatEffInstance, transform.position, Quaternion.identity);
+            int BeatNum = GameSystem.self.currentBeatNum;
+            Instantiate(BeatEffInstance[Mathf.Max(0,BeatNum) % BeatEffInstance.Count], transform.position, Quaternion.identity);
             BeatRecorded = GameSystem.self.currentBeatNum;
         }
         transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * ErasingTime / 0.4f, Time.deltaTime * 5f);
@@ -79,7 +81,7 @@ public class PartsCapture : MonoBehaviour
             (Vector3.ProjectOnPlane(newPosition - man.transform.position, Vector3.up).magnitude < man.range ||
             Vector3.ProjectOnPlane(transform.position - man.transform.position, Vector3.up).magnitude < man.range)
             {
-                man.BroadcastMessage("Packing", GameSystem.self.CheckBeatInSync(0.5f));
+                man.BroadcastMessage("Packing", GameSystem.self.CheckBeatInSync(0.3f));
             }
         }
         //animator.SetBool("isCaptureReady", false);

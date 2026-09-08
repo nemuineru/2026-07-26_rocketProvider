@@ -17,7 +17,7 @@ public class Consumer : MonoBehaviour
     [SerializeField]
     SplineContainer splineContainer;
 
-    public float BeatRatio = 1.5f;
+    public int SetBeatAt = 2;
 
     Animator animator;
 
@@ -49,8 +49,7 @@ public class Consumer : MonoBehaviour
     void FixedUpdate()
     {
         int beatMatch = 
-            Mathf.FloorToInt((GameSystem.self.exactMusicTime - GameSystem.self.audioOffset) /
-             (60f / GameSystem.self.tempo));
+            GameSystem.self.currentBeatNum;
         
         if(Gateways != null)
         {
@@ -79,7 +78,7 @@ public class Consumer : MonoBehaviour
                 if(index_Parts == 0)
                 {
                     part.isConsuming = true;
-                    if(part.beatStart < beatMatch)
+                    if(part.beatStart < beatMatch && beatMatch % SetBeatAt == 0)
                     {
                         part.isDamaging = true;
                         part.beatStart = beatMatch;
