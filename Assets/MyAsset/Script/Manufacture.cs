@@ -16,7 +16,7 @@ public class Manufacture : MonoBehaviour
 
     //瓶詰めオブジェクト
     [SerializeField]
-    public GameObject NormalPackage, CriticalPackage;
+    public GameObject NormalPackage;
     
     [SerializeField]
     public GameObject UIPrefab;
@@ -68,7 +68,7 @@ public class Manufacture : MonoBehaviour
     //圧縮再配送スクリプト
     public void Packing(bool isCritical = false)
     {
-        Instantiate(isCritical ? CriticalPackage : NormalPackage, transform.position - transform.up * 2f, Quaternion.identity);
+        Instantiate(NormalPackage, transform.position - transform.up * 2f, Quaternion.identity);
         if (InsideParts.Count > 0 && !isPacking && BeatRecorded != GameSystem.self.currentBeatNum)
         {
             calcDesc = "";

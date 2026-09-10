@@ -12,8 +12,8 @@ public class PartsCapture : MonoBehaviour
     [SerializeField]
     int BeatRecorded = 0;
 
-    [SerializeField]
-    List<GameObject> BeatEffInstance;
+    // [SerializeField]
+    // List<GameObject> BeatEffInstance;
 
     Animator animator;
     // Start is called before the first frame update
@@ -37,7 +37,7 @@ public class PartsCapture : MonoBehaviour
         else if(BeatRecorded != GameSystem.self.currentBeatNum)
         {
             int BeatNum = GameSystem.self.currentBeatNum;
-            Instantiate(BeatEffInstance[Mathf.Max(0,BeatNum) % BeatEffInstance.Count], transform.position, Quaternion.identity);
+            // Instantiate(BeatEffInstance[Mathf.Max(0,BeatNum) % BeatEffInstance.Count], transform.position, Quaternion.identity);
             BeatRecorded = GameSystem.self.currentBeatNum;
         }
         transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * ErasingTime / 0.4f, Time.deltaTime * 5f);

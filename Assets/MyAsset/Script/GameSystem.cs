@@ -79,8 +79,10 @@ public class GameSystem : MonoBehaviour
     public float minLimit = 0f;
     public float currentLimit = 0f;
 
+    public float missedDecreaseMultiplier = 1.0f;
+
     float dangerCountMax = 10;
-    public float dangerCount = 0;
+    public float dangerCount = 10;
 
 
     public float gameTime = -2.8f;
@@ -102,8 +104,8 @@ public class GameSystem : MonoBehaviour
     [System.Serializable]
     public class LevelData
     {
-        //レベルの最小スタート地点
-        public int startLevel;
+        //最小スタートスコア
+        public int nextScore;
 
         //ベルトの進むスピード
         public float speed;
@@ -125,6 +127,8 @@ public class GameSystem : MonoBehaviour
             this.speed = speed;
             this.generatingRate = generatingRate;
         }
+
+        public AudioClip levelMusic;
     }
 
     //Static化
@@ -154,14 +158,31 @@ public class GameSystem : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {        
-        float levelProgression = 10000f;
-        //3000点毎にレベルアップ.
-        int newLevel = 1 + Mathf.FloorToInt(Score / levelProgression);
-        if(newLevel > Level)
+        //規定得点に達した際、レベルアップする.
+        int LoadLevel = Mathf.Min(Level, levelDatas.Count - 1);
+        int NextLevelScore = levelDatas[LoadLevel].nextScore;
+        if(Score >= NextLevelScore && Level < levelDatas.Count - 1)
         {
+            Level++;
             LevelUpSound.Play();
         }
-        Level = newLevel;
+        speed = levelDatas[LoadLevel].speed;
+        generatingRate = levelDatas[LoadLevel].generatingRate;
+        minLimit = levelDatas[LoadLevel].limitDecreasingRate;
+        missedDecreaseMultiplier = levelDatas[LoadLevel].missedDecreaseMultiplier;
+
+        // Level
+
+
+        // float levelProgression = 10000f;
+        // //3000点毎にレベルアップ.
+        // int newLevel = 1 + Mathf.FloorToInt(Score / levelProgression);
+        // if(newLevel > Level)
+        // {
+        //     
+        // }
+        // Level = newLevel;
+
 
         gameTime += Time.fixedDeltaTime;
         //ゲーム時間が0以上の時のみ、ゲームシステムを動かす.

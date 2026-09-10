@@ -29,7 +29,7 @@ public class UISystem : MonoBehaviour
     void Update()
     {
         CurrentScore = Mathf.Lerp(CurrentScore, GameSystem.self.Score, .2f);
-        NextScore = Mathf.Max(NextScore, GameSystem.self.Level * 10000);
+        NextScore = Mathf.Max(NextScore, GameSystem.self.levelDatas[Mathf.Min(GameSystem.self.Level, GameSystem.self.levelDatas.Count - 1)].nextScore);
 
         levelText.text = "LEVEL " + GameSystem.self.Level.ToString("D2");
         scoreText.text = "PTS " + ((int)CurrentScore).ToString("D8");

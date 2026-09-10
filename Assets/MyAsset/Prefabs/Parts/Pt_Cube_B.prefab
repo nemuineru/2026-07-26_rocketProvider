@@ -252,10 +252,10 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 3191e4004afd2ee46a2ae218d5b1621a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 414e2a6b0deea154ba8be7a05290f62a, type: 2}
+      objectReference: {fileID: 2100000, guid: 36b8b3e489a49b84f9d93411aa2a7a77, type: 2}
     - target: {fileID: 919132149155446097, guid: 3191e4004afd2ee46a2ae218d5b1621a, type: 3}
       propertyPath: m_Name
-      value: Pt_Cube
+      value: Pt_Cube_B
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 3191e4004afd2ee46a2ae218d5b1621a, type: 3}
       propertyPath: m_Layer
@@ -352,13 +352,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   color: 0
-  PartType: 2
+  PartType: 0
   deliveryTime: 0
   baseScore: 100
   isTrash: 0
   Level: 1
   HitPoint: 1
-  bpmDecreaseToValue: 1
+  beatStart: 0
   CapturedBy: {fileID: 0}
   rb: {fileID: 0}
   collider: {fileID: 0}
@@ -369,6 +369,8 @@ MonoBehaviour:
   CaptureEffect: {fileID: 6908653857184209966}
   isGrabbed: 0
   isConsuming: 0
+  isDelivered: 0
+  isDamaging: 0
 --- !u!1001 &6908653857184344498
 PrefabInstance:
   m_ObjectHideFlags: 0
