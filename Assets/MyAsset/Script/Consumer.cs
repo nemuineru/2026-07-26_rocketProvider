@@ -23,6 +23,8 @@ public class Consumer : MonoBehaviour
 
     int dividerNum = 3;
 
+    int beatErased = -4;
+
     [SerializeField]
     GameObject Gateways;
 
@@ -48,13 +50,11 @@ public class Consumer : MonoBehaviour
 
     void FixedUpdate()
     {
+
         int beatMatch = 
             GameSystem.self.currentBeatNum;
-        
-        if(Gateways != null)
-        {
-            Gateways.SetActive(collectedParts.Count >= MaxParts);
-        }
+
+        //bool canErase = beatErased <= beatMatch - 2;        
 
         int index_Reverse = MaxParts * dividerNum;
         foreach(var part in SegmentParts)
@@ -82,6 +82,7 @@ public class Consumer : MonoBehaviour
                     {
                         part.isDamaging = true;
                         part.beatStart = beatMatch;
+                        beatErased = beatMatch;
                     }
                     //音楽のBPMに合わせて、消費するパーツのHPを増減. BPMが早いほど、HP消費は早くなる. 及びにスコアを加算する. 音楽再生位置の補正もかける.
                     float baseDecreasement = GameSystem.self.tempo / 60f * Time.fixedDeltaTime;
@@ -96,6 +97,11 @@ public class Consumer : MonoBehaviour
                 part.rb.velocity = Vector3.Lerp(part.rb.velocity, Vector3.zero, 0.5f);
                 index_Parts++;
             }
+        }
+        bool isGatewayActive = collectedParts.Count >= MaxParts;
+        if(Gateways != null)
+        {
+            Gateways.SetActive(isGatewayActive);
         }
     }
 }

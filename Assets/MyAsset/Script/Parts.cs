@@ -137,14 +137,30 @@ public class Parts : MonoBehaviour
             //大きいほど、HPの減少が遅くなる. つまり、レベルが高いほど、HPの減少が遅くなる.
             //但し、大きくなりすぎないように.
             float DecreaseValue = Mathf.Min(GameSystem.self.rhymeChain + 1, 4);
+
+            //2026-09-12 ..一旦これ減少量を全部にしてテンポ早めたほうが良いかもな―と思ったけどやっぱ却下
+            //HitPoint = 0;
+            
+            //スコア加算は最大値のときのみLV分増加.
+            if(HitPoint == Level)
+            {
+                GameSystem.self.Score += Mathf.RoundToInt(50f * Level);
+            }
+            //それ以外はBeatごとに.
+            else
+            {
+                GameSystem.self.Score += 100;
+            }
+
             HitPoint -= (int)DecreaseValue;
             GameSystem.self.rhymeChain++;
-            GameSystem.self.grooveTime += Mathf.Min(Level / DecreaseValue , 8f) * GameSystem.self.bpmCaclRate;
+            //Groovetimeは10LV以上で2beatまで回復. それ以下は1/4beat.
+            float GrooveIncreaseValue = Level >= 10 ? 2f : .25f; //Mathf.Min(Level / DecreaseValue , 8f);
+            GameSystem.self.grooveTime += GrooveIncreaseValue * GameSystem.self.bpmCaclRate;
     
             float chillingValue = Mathf.Pow(Level, 0.5f) * 2f;
 
             GameSystem.self.currentLimit -= chillingValue;
-            GameSystem.self.Score += Mathf.RoundToInt(100f * chillingValue);
             isDamaging = false;
         }
         //キャプチャーされているときは考慮しない.
@@ -193,6 +209,10 @@ public class Parts : MonoBehaviour
         if (((transform.position.y < -10f) && CapturedBy == null && deliveryTime <= 0f && !isConsuming) || HitPoint <= 0)
         {
             Deletation(HitPoint > 0);
+        }
+        if(GameSystem.self.currentGameState == GameSystem.GameState.GameOver)
+        {
+            rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, 0.1f);
         }
 
     }

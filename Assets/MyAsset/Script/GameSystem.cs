@@ -76,7 +76,7 @@ public class GameSystem : MonoBehaviour
     //currentLimitが100となったあと、デンジャーカウントが始まる.
     //デンジャーカウントが0になるとゲームオーバー. 一度でも100以下になれば徐々にデンジャーカウントは減少する.
     internal float maxLimit = 100f;
-    public float minLimit = 0f;
+    public float limitRate = 0f;
     public float currentLimit = 0f;
 
     public float missedDecreaseMultiplier = 1.0f;
@@ -99,6 +99,17 @@ public class GameSystem : MonoBehaviour
     public float exactMusicTime = 1.0f;
 
     public int currentBeatNum, recorededBeatNum = 0;
+
+    public enum GameState
+    {
+        Playing,
+        GameOver,
+        Paused
+    }
+    public GameState currentGameState = GameState.Playing;
+
+    [SerializeField]
+    List<GameObject> onGameover_ActivateObj;
 
 
     [System.Serializable]
@@ -166,10 +177,10 @@ public class GameSystem : MonoBehaviour
             Level++;
             LevelUpSound.Play();
         }
-        speed = levelDatas[LoadLevel].speed;
-        generatingRate = levelDatas[LoadLevel].generatingRate;
-        minLimit = levelDatas[LoadLevel].limitDecreasingRate;
-        missedDecreaseMultiplier = levelDatas[LoadLevel].missedDecreaseMultiplier;
+        speed = currentGameState == GameState.Playing ? levelDatas[LoadLevel].speed : 0f;
+        generatingRate = currentGameState == GameState.Playing ? levelDatas[LoadLevel].generatingRate : 0f;
+        limitRate = currentGameState == GameState.Playing ? levelDatas[LoadLevel].limitDecreasingRate : 0f;
+        missedDecreaseMultiplier = currentGameState == GameState.Playing ? levelDatas[LoadLevel].missedDecreaseMultiplier : 0f;
 
         // Level
 
@@ -186,7 +197,7 @@ public class GameSystem : MonoBehaviour
 
         gameTime += Time.fixedDeltaTime;
         //ゲーム時間が0以上の時のみ、ゲームシステムを動かす.
-        if (gameTime > 0f)
+        if (gameTime > 0f && currentGameState == GameState.Playing)
         {
             if (IngameAudio != null && !IngameAudio.isPlaying)
             {
@@ -244,9 +255,9 @@ public class GameSystem : MonoBehaviour
             //時間経過で緩やかに. 但しrhymeChainが1以上の時は進行しない。
             if (rhymeChain == 0)
             {
-                currentLimit += Time.fixedDeltaTime * Level * .25f;
+                currentLimit += Time.fixedDeltaTime * limitRate * .25f;
             }
-            currentLimit = Mathf.Clamp(currentLimit, minLimit, maxLimit);
+            currentLimit = Mathf.Clamp(currentLimit, 0, maxLimit);
 
             //現在の再生位置の正確な時間を取得.
             exactMusicTime = (float)IngameAudio.timeSamples / IngameAudio.clip.frequency;
@@ -266,7 +277,29 @@ public class GameSystem : MonoBehaviour
         else
         {
             dangerCount += Time.fixedDeltaTime / bpmCaclRate * .5f;
-            dangerCount = Mathf.Clamp(dangerCount, 0f, 10f);
+        }
+        dangerCount = Mathf.Clamp(dangerCount, 0f, 10f);
+
+        if(dangerCount == 0)
+        {
+            currentGameState = GameState.GameOver;
+        }
+        if(currentGameState == GameState.GameOver)
+        {
+            // ゲームオーバー時の処理をここに追加する
+            // 例: UIの表示、音楽の停止など
+            if(onGameover_ActivateObj != null)
+            {
+                IngameAudio.Stop();
+                foreach(GameObject obj in onGameover_ActivateObj)
+                {
+                    obj.SetActive(true);
+                }
+                if(Input.GetMouseButtonDown(0))
+                {
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("TitleScene");
+                }
+            }
         }
     }
     
