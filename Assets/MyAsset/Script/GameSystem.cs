@@ -65,7 +65,7 @@ public class GameSystem : MonoBehaviour
 
     //イキオイ状態の時間. これが0になるとコンボボーナスが切れる.
     public float grooveTime;
-    public float grooveTimeMax = 4.0f;
+    public float grooveTimeMax = 2.0f;
 
     //次のレベルに上がるためのスコアの閾値.
     public int NextLevelScore = 1000;
@@ -182,6 +182,16 @@ public class GameSystem : MonoBehaviour
         limitRate = currentGameState == GameState.Playing ? levelDatas[LoadLevel].limitDecreasingRate : 0f;
         missedDecreaseMultiplier = currentGameState == GameState.Playing ? levelDatas[LoadLevel].missedDecreaseMultiplier : 0f;
 
+        if(rhymeChain > 0 && InputInstance.self.isClicked && !InputInstance.self.isFastforwarded)
+        {
+            speed /= 5.0f;
+            generatingRate /= 5.0f;
+        }
+        else if(InputInstance.self.isFastforwarded)
+        {
+            speed *= 5.0f;
+            generatingRate *= 5.0f;
+        }
         // Level
 
 
@@ -257,6 +267,10 @@ public class GameSystem : MonoBehaviour
             {
                 currentLimit += Time.fixedDeltaTime * limitRate * .25f;
             }
+            else
+            {
+                currentLimit += Time.fixedDeltaTime * limitRate * .1f;
+            }
             currentLimit = Mathf.Clamp(currentLimit, 0, maxLimit);
 
             //現在の再生位置の正確な時間を取得.
@@ -300,6 +314,10 @@ public class GameSystem : MonoBehaviour
                     UnityEngine.SceneManagement.SceneManager.LoadScene("TitleScene");
                 }
             }
+        }
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("TitleScene");
         }
     }
     

@@ -278,15 +278,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 4f99e9e6a82628b40bc3d716ff87781d, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4f99e9e6a82628b40bc3d716ff87781d, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4f99e9e6a82628b40bc3d716ff87781d, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4f99e9e6a82628b40bc3d716ff87781d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -445,9 +445,9 @@ MonoBehaviour:
   CapturedBy: {fileID: 0}
   rb: {fileID: 0}
   collider: {fileID: 0}
-  componentEffect: {fileID: 145256, guid: 3a92393a98d626c4c972bfa141231bc7, type: 3}
+  breakingEffect: {fileID: 145256, guid: 3a92393a98d626c4c972bfa141231bc7, type: 3}
+  componentEffect: {fileID: 145256, guid: cd0cc24479c5b7c4e82f755d0bde9d55, type: 3}
   erasingEffect: {fileID: 0}
-  breakingEffect: {fileID: 0}
   GroundEffect: {fileID: 0}
   CaptureEffect: {fileID: 6380456173233252456}
   isGrabbed: 0

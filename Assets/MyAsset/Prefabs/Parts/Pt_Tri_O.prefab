@@ -278,15 +278,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: fd5291a1c4186b142b22b535429f42a2, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fd5291a1c4186b142b22b535429f42a2, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fd5291a1c4186b142b22b535429f42a2, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fd5291a1c4186b142b22b535429f42a2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -335,7 +335,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: fd5291a1c4186b142b22b535429f42a2, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 36b8b3e489a49b84f9d93411aa2a7a77, type: 2}
+      objectReference: {fileID: 2100000, guid: 414e2a6b0deea154ba8be7a05290f62a, type: 2}
     - target: {fileID: 919132149155446097, guid: fd5291a1c4186b142b22b535429f42a2, type: 3}
       propertyPath: m_Name
       value: Pt_Tri_O
@@ -440,9 +440,9 @@ MonoBehaviour:
   CapturedBy: {fileID: 0}
   rb: {fileID: 0}
   collider: {fileID: 0}
-  componentEffect: {fileID: 145256, guid: 3a92393a98d626c4c972bfa141231bc7, type: 3}
+  breakingEffect: {fileID: 145256, guid: 3a92393a98d626c4c972bfa141231bc7, type: 3}
+  componentEffect: {fileID: 145256, guid: cd0cc24479c5b7c4e82f755d0bde9d55, type: 3}
   erasingEffect: {fileID: 0}
-  breakingEffect: {fileID: 0}
   GroundEffect: {fileID: 0}
   CaptureEffect: {fileID: 533916117547823904}
   isGrabbed: 0

@@ -42,6 +42,10 @@ public class Parts : MonoBehaviour
     public Rigidbody rb;
     public Collider collider;
 
+    //パーツのダメージエフェクト
+    [SerializeField]
+    public GameObject breakingEffect;
+
     //梱包完了時のエフェクト
     [SerializeField]
     public GameObject componentEffect;
@@ -50,9 +54,6 @@ public class Parts : MonoBehaviour
     [SerializeField]
     public GameObject erasingEffect;
 
-    //パーツのダメージエフェクト
-    [SerializeField]
-    public GameObject breakingEffect;
 
     //転がってたりするときのエフェクト
     [SerializeField]
@@ -132,8 +133,7 @@ public class Parts : MonoBehaviour
         }
         else if(isDamaging)
         {
-            GameObject effectInstance = Instantiate(componentEffect, transform.position, Quaternion.identity);
-            effectInstance.transform.localScale = Vector3.one * 2.0f;
+            GameObject effectInstance = null;
             //大きいほど、HPの減少が遅くなる. つまり、レベルが高いほど、HPの減少が遅くなる.
             //但し、大きくなりすぎないように.
             float DecreaseValue = Mathf.Min(GameSystem.self.rhymeChain + 1, 4);
@@ -145,16 +145,23 @@ public class Parts : MonoBehaviour
             if(HitPoint == Level)
             {
                 GameSystem.self.Score += Mathf.RoundToInt(50f * Level);
+                    effectInstance = Instantiate(Level >= 10 ? componentEffect : breakingEffect, 
+                    transform.position, Quaternion.identity);
             }
             //それ以外はBeatごとに.
             else
             {
                 GameSystem.self.Score += 100;
+                effectInstance = Instantiate(breakingEffect, transform.position, Quaternion.identity);                
+            }
+            if(effectInstance != null)
+            {
+                effectInstance.transform.localScale = Vector3.one * 2.0f;
             }
 
             HitPoint -= (int)DecreaseValue;
             GameSystem.self.rhymeChain++;
-            //Groovetimeは10LV以上で2beatまで回復. それ以下は1/4beat.
+            //Groovetimeは10LV以上で1.5beatまで回復. それ以下は0.75beat.
             float GrooveIncreaseValue = Level >= 10 ? 2f : .25f; //Mathf.Min(Level / DecreaseValue , 8f);
             GameSystem.self.grooveTime += GrooveIncreaseValue * GameSystem.self.bpmCaclRate;
     

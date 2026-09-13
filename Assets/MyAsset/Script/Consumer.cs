@@ -31,6 +31,9 @@ public class Consumer : MonoBehaviour
     [SerializeField]
     public Bounds boundary;
 
+    [SerializeField]
+    Transform headPosTransform;
+
     void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
@@ -86,7 +89,7 @@ public class Consumer : MonoBehaviour
                     }
                     //音楽のBPMに合わせて、消費するパーツのHPを増減. BPMが早いほど、HP消費は早くなる. 及びにスコアを加算する. 音楽再生位置の補正もかける.
                     float baseDecreasement = GameSystem.self.tempo / 60f * Time.fixedDeltaTime;
-                    HeadPos = transform.position + Vector3.up * 8f;
+                    HeadPos = headPosTransform.position;
                 }
                 else
                 {

@@ -109,6 +109,15 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""FastForward"",
+                    ""type"": ""Button"",
+                    ""id"": ""f6719597-af69-45be-b758-7d12d2793ce4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -133,6 +142,17 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
                     ""action"": ""ScreenPosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""62bd99de-fca1-4968-9211-046d3a6c7e22"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FastForward"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -143,6 +163,7 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
         m_Basic = asset.FindActionMap("Basic", throwIfNotFound: true);
         m_Basic_Click = m_Basic.FindAction("Click", throwIfNotFound: true);
         m_Basic_ScreenPosition = m_Basic.FindAction("ScreenPosition", throwIfNotFound: true);
+        m_Basic_FastForward = m_Basic.FindAction("FastForward", throwIfNotFound: true);
     }
 
     ~@InputMaster()
@@ -225,6 +246,7 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
     private List<IBasicActions> m_BasicActionsCallbackInterfaces = new List<IBasicActions>();
     private readonly InputAction m_Basic_Click;
     private readonly InputAction m_Basic_ScreenPosition;
+    private readonly InputAction m_Basic_FastForward;
     /// <summary>
     /// Provides access to input actions defined in input action map "Basic".
     /// </summary>
@@ -244,6 +266,10 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Basic/ScreenPosition".
         /// </summary>
         public InputAction @ScreenPosition => m_Wrapper.m_Basic_ScreenPosition;
+        /// <summary>
+        /// Provides access to the underlying input action "Basic/FastForward".
+        /// </summary>
+        public InputAction @FastForward => m_Wrapper.m_Basic_FastForward;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -276,6 +302,9 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
             @ScreenPosition.started += instance.OnScreenPosition;
             @ScreenPosition.performed += instance.OnScreenPosition;
             @ScreenPosition.canceled += instance.OnScreenPosition;
+            @FastForward.started += instance.OnFastForward;
+            @FastForward.performed += instance.OnFastForward;
+            @FastForward.canceled += instance.OnFastForward;
         }
 
         /// <summary>
@@ -293,6 +322,9 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
             @ScreenPosition.started -= instance.OnScreenPosition;
             @ScreenPosition.performed -= instance.OnScreenPosition;
             @ScreenPosition.canceled -= instance.OnScreenPosition;
+            @FastForward.started -= instance.OnFastForward;
+            @FastForward.performed -= instance.OnFastForward;
+            @FastForward.canceled -= instance.OnFastForward;
         }
 
         /// <summary>
@@ -347,5 +379,12 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnScreenPosition(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "FastForward" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnFastForward(InputAction.CallbackContext context);
     }
 }

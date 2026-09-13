@@ -23,6 +23,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "FastForward",
+                    "type": "Button",
+                    "id": "f6719597-af69-45be-b758-7d12d2793ce4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -45,6 +54,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "ScreenPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "62bd99de-fca1-4968-9211-046d3a6c7e22",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FastForward",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

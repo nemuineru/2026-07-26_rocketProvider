@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 420902}
   - component: {fileID: 19891006}
   - component: {fileID: 19907282}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: MagicDust
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4858,8 +4858,8 @@ GameObject:
   - component: {fileID: 19825070}
   - component: {fileID: 19985118}
   - component: {fileID: 8470182043226868797}
-  m_Layer: 0
-  m_Name: Dust
+  m_Layer: 9
+  m_Name: Erase_Small
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9705,7 +9705,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 4773ceaa4c4a84b428f272f1e54c3dd1, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 1f1b9861c9950a74997c2896ca59384b, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -9802,7 +9802,7 @@ GameObject:
   - component: {fileID: 4350797731151758}
   - component: {fileID: 198535239526381674}
   - component: {fileID: 199754481909346676}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: CenterGlow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
