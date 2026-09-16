@@ -8,6 +8,22 @@ public class ScenePlayer : MonoBehaviour
 {
     [SerializeField]
     TransitionAnimator transitionsPlus;
+
+    [SerializeField]
+    GameObject gameInstructSet;
+
+    [SerializeField]
+    GameObject InstructionNext, InstructionPrev;
+
+    public MenuType currentMenuType = MenuType.MainGame;
+
+    public enum MenuType
+    {
+        MainGame,
+        Instruction,
+        Options,
+        Credits
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -19,6 +35,11 @@ public class ScenePlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+        gameInstructSet.SetActive(currentMenuType == MenuType.Instruction);
+        InstructionNext.SetActive(currentMenuType == MenuType.Instruction);
+        InstructionPrev.SetActive(currentMenuType == MenuType.Instruction);
+
         if(Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
