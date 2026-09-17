@@ -6,14 +6,13 @@ using TransitionsPlus;
 
 public class ScenePlayer : MonoBehaviour
 {
+    static public ScenePlayer instance;
+
     [SerializeField]
     TransitionAnimator transitionsPlus;
 
     [SerializeField]
-    GameObject gameInstructSet;
-
-    [SerializeField]
-    GameObject InstructionNext, InstructionPrev;
+    GameObject gameInstructSet, gameTitleSet;
 
     public MenuType currentMenuType = MenuType.MainGame;
 
@@ -24,7 +23,18 @@ public class ScenePlayer : MonoBehaviour
         Options,
         Credits
     }
-    // Start is called before the first frame update
+    private void Awake()
+    {
+        if(instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     void Start()
     {
         
@@ -35,22 +45,26 @@ public class ScenePlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
         gameInstructSet.SetActive(currentMenuType == MenuType.Instruction);
-        InstructionNext.SetActive(currentMenuType == MenuType.Instruction);
-        InstructionPrev.SetActive(currentMenuType == MenuType.Instruction);
+        gameTitleSet.SetActive(currentMenuType == MenuType.MainGame);
 
         if(Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
         }
-        if(Input.GetMouseButtonDown(0))
-        {
-            transitionsPlus.Play();
-        }    
         if( playTime >= transitionsPlus.profile.duration){
             SceneManager.LoadScene("MainGameScene");
         }
         playTime += Time.deltaTime * (transitionsPlus.isPlaying ? 1 : 0);
+    }
+
+    public void StartTransition()
+    {
+        transitionsPlus.Play();
+    }
+
+    public void SetMenuType(string menuType)
+    {
+        currentMenuType = (MenuType)System.Enum.Parse(typeof(MenuType), menuType);
     }
 }
