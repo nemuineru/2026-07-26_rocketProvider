@@ -7,6 +7,9 @@ public class HandTracking : MonoBehaviour
     [SerializeField]
     Mesh mesh_Grab, mesh_Release;
     MeshFilter meshFilter;
+
+    [SerializeField]
+    Vector3 shift;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,7 +27,11 @@ public class HandTracking : MonoBehaviour
         {
             Vector3 pos = GameSystem.self.MainRay.GetPoint(enter) 
             + Vector3.up * (isClicked ? 2 : 3);
-            transform.position = Vector3.Lerp(transform.position, pos, .1f);
+            if(GameSystem.self.grabbingParts != null)
+            {
+                pos = GameSystem.self.MainRay.GetPoint(enter) + Vector3.up * (GameSystem.self.grabbingParts.Level * 0.20f + 4);
+            }
+            transform.position = Vector3.Lerp(transform.position, pos + shift, .1f);
         }
         transform.rotation = Quaternion.LookRotation(Vector3.right, Vector3.up);
     }

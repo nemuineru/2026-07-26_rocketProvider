@@ -79,7 +79,20 @@ public class Parts : MonoBehaviour
             AudioSource.PlayClipAtPoint
             (GameSystem.self.PartSoundOnTouch[UnityEngine.Random.Range(0, GameSystem.self.PartSoundOnTouch.Count)], transform.position);
         }
+        if(collision != null )
+        {
+            Parts hitPart = collision.gameObject.GetComponent<Parts>();
+            if(isGrabbed && hitPart != null)
+            {
+                if(hitPart.PartType == PartType && hitPart.color == color)
+                {
+                    hitPart.Deletation();
+                    Level++;
+                }
+            }
+        }
     }
+
     void OnCollisionStay(Collision collision)
     {
         Vector3 contactPoint = collision.contacts[0].point;
@@ -171,7 +184,7 @@ public class Parts : MonoBehaviour
             isDamaging = false;
         }
         //キャプチャーされているときは考慮しない.
-        collider.enabled = !isGrabbed;
+        //collider.enabled = isGrabbed;
         rb.useGravity = !isGrabbed;
         rb.mass = 1f + Mathf.Pow(Level, 0.25f) * 0.1f;
         //キャプチャーされてたり、配送中の時は小さくする. それ以外はレベルに応じて大きくする.
@@ -180,7 +193,7 @@ public class Parts : MonoBehaviour
         transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * targetScale, 0.1f);
         if (CapturedBy != null)
         {
-            gameObject.layer = LayerMask.NameToLayer("CapturedEntity");
+            //gameObject.layer = LayerMask.NameToLayer("CapturedEntity");
         }
         else
         {
@@ -241,7 +254,7 @@ public class Parts : MonoBehaviour
     public void OnGrabbed()
     {
         Plane plane =
-        new Plane(GameSystem.self.PartPlane.transform.up, GameSystem.self.PartPlane.transform.position + Vector3.up * yPos);
+        new Plane(GameSystem.self.PartPlane.transform.up, GameSystem.self.PartPlane.transform.position + Vector3.up * yPos * (Level * 0.05f + 1));
         Vector3 newPosition = plane.Raycast(GameSystem.self.MainRay, out float distance) ?
         GameSystem.self.MainRay.GetPoint(distance) : transform.position;
 
@@ -255,7 +268,7 @@ public class Parts : MonoBehaviour
 
         Debug.Log("Released Part: " + name);
         Plane plane =
-        new Plane(GameSystem.self.PartPlane.transform.up, GameSystem.self.PartPlane.transform.position + Vector3.up * yPos);
+        new Plane(GameSystem.self.PartPlane.transform.up, GameSystem.self.PartPlane.transform.position + Vector3.up * yPos * (Level * 0.05f + 1));
         Vector3 newPosition = plane.Raycast(GameSystem.self.MainRay, out float distance) ?
         GameSystem.self.MainRay.GetPoint(distance) : transform.position;
 
@@ -288,7 +301,7 @@ public class Parts : MonoBehaviour
 
         Vector3 Twards = (CapturedBy.transform.position - transform.position);
         float dist = Twards.magnitude;
-        collider.enabled = ignoreColliders > dist;
+        //collider.enabled = ignoreColliders > dist;
 
         if (dist > nonRange)
         {
