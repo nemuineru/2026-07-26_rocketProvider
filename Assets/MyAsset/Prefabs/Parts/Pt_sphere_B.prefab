@@ -447,7 +447,7 @@ MonoBehaviour:
   collider: {fileID: 0}
   breakingEffect: {fileID: 145256, guid: 3a92393a98d626c4c972bfa141231bc7, type: 3}
   componentEffect: {fileID: 145256, guid: cd0cc24479c5b7c4e82f755d0bde9d55, type: 3}
-  erasingEffect: {fileID: 0}
+  erasingEffect: {fileID: 1765137710588814, guid: 5b2f38eba6fc43049ad09805f56acb7a, type: 3}
   GroundEffect: {fileID: 0}
   CaptureEffect: {fileID: 6380456173233252456}
   isGrabbed: 0

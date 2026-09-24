@@ -1,10 +1,9 @@
-
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Splines;
 using Unity.Mathematics;
+using System.Linq;
 
 public class Parts : MonoBehaviour
 {
@@ -82,12 +81,17 @@ public class Parts : MonoBehaviour
         if(collision != null )
         {
             Parts hitPart = collision.gameObject.GetComponent<Parts>();
+            //ある程度のスピードが乗った状態で衝突した時融合. 対象のレベルが低い時のみ
             if(isGrabbed && hitPart != null)
             {
-                if(hitPart.PartType == PartType && hitPart.color == color)
+                //同じカラーで同じパーツで融合. 融合先のパーツに切り替える...のは無法すぎる.
+                if((hitPart.PartType == PartType && hitPart.color == color) && rb.velocity.magnitude > 1.0f && hitPart.Level <= Level)
                 {
-                    hitPart.Deletation();
-                    Level++;
+                    hitPart.Deletation(false, true);
+                    Level += hitPart.Level;
+                    color = hitPart.color;
+                    PartType = hitPart.PartType;
+                    //settingParts();
                 }
             }
         }
@@ -134,9 +138,16 @@ public class Parts : MonoBehaviour
         }
     }
 
+    float deleteMinLevel = 3f;
+
     // Update is called once per frame
     void FixedUpdate()
     {
+        if(Level > deleteMinLevel && !isGrabbed)
+        {
+            isDamaging = true;
+            isConsuming = true;
+        }
         //消費前のパーツはBPMの補正を掛けておく. GameSystem.self.OffsetTimeを使って、音楽の再生位置の補正もかける.
         //減少量に関して、Rhymeコンボ5+になるまでは1->2->3->4->5の順で増加していく.
         if(!isConsuming)
@@ -144,12 +155,13 @@ public class Parts : MonoBehaviour
             HitPoint = Level;
             beatStart = GameSystem.self.currentBeatNum;
         }
-        else if(isDamaging)
+        //消費中の処理
+        else if(beatStart < GameSystem.self.currentBeatNum)
         {
-            GameObject effectInstance = null;
             //大きいほど、HPの減少が遅くなる. つまり、レベルが高いほど、HPの減少が遅くなる.
             //但し、大きくなりすぎないように.
-            float DecreaseValue = Mathf.Min(GameSystem.self.rhymeChain + 1, 4);
+            float DecreaseValue = 1f;//Mathf.Min(GameSystem.self.rhymeChain + 1, 4);
+            GameObject effectInstance = null;
 
             //2026-09-12 ..一旦これ減少量を全部にしてテンポ早めたほうが良いかもな―と思ったけどやっぱ却下
             //HitPoint = 0;
@@ -173,15 +185,7 @@ public class Parts : MonoBehaviour
             }
 
             HitPoint -= (int)DecreaseValue;
-            GameSystem.self.rhymeChain++;
-            //Groovetimeは10LV以上で1.5beatまで回復. それ以下は0.75beat.
-            float GrooveIncreaseValue = Level >= 10 ? 2f : .25f; //Mathf.Min(Level / DecreaseValue , 8f);
-            GameSystem.self.grooveTime += GrooveIncreaseValue * GameSystem.self.bpmCaclRate;
-    
-            float chillingValue = Mathf.Pow(Level, 0.5f) * 2f;
-
-            GameSystem.self.currentLimit -= chillingValue;
-            isDamaging = false;
+            beatStart = GameSystem.self.currentBeatNum;
         }
         //キャプチャーされているときは考慮しない.
         //collider.enabled = isGrabbed;
@@ -237,17 +241,52 @@ public class Parts : MonoBehaviour
 
     }
 
-    public void Deletation(bool isPenalty = false)
+    public void Deletation(bool isPenalty = false, bool isConsumed = false)
     {
-        if (isPenalty)
+        if (!isPenalty)
+        {
+            if(!isConsumed)
+            {
+                if(Level >= 2)
+                {
+                    GameObject effectInstance = Instantiate(componentEffect, transform.position, Quaternion.identity);
+                    float range = 2.8f + 0.4f * Mathf.Max(0, Level - deleteMinLevel);
+                List<Parts> NearbyParts = new List<Parts>();
+                NearbyParts = Physics.OverlapCapsule(transform.position + Vector3.down * 3.0f, transform.position + Vector3.up * 3.0f, range).ToList()
+                    .Select(collider => collider.GetComponent<Parts>())
+                    .Where(parts => parts != null && parts != this)
+                    .ToList();
+                    foreach (var part in NearbyParts)
+                    {
+                        if(part.Level <= Level)
+                        {
+                            // Do something with the nearby part
+                            part.rb.AddForce((part.transform.position - transform.position).normalized
+                             * 0.3f * Mathf.Max(0, Level - deleteMinLevel), ForceMode.Impulse);
+                            part.isConsuming = true;
+                        }
+                    }
+                    GameStatusSet();
+                }
+                else
+                {
+                    GameObject effectInstance = Instantiate(erasingEffect, transform.position, Quaternion.identity);
+                }
+            }
+        }
+        else
         {
             GameSystem.self.currentLimit += 5f;
         }
-        if (erasingEffect != null)
+        if (isConsumed && erasingEffect != null)
         {
-            GameObject effect = Instantiate(erasingEffect, transform.position, Quaternion.identity);
-            Destroy(effect, 2f);
+            GameObject effectInstance = Instantiate(erasingEffect, transform.position, Quaternion.identity);
         }
+        // if (erasingEffect != null)
+        // {
+        //     GameObject effect = Instantiate(erasingEffect, transform.position, Quaternion.identity);
+        //     Destroy(effect, 2f);
+        // }
         Destroy(gameObject);
     }
 
@@ -312,6 +351,17 @@ public class Parts : MonoBehaviour
                 rb.velocity *= 0.95f; // ブレーキ
             }
         }
+    }
+
+    void GameStatusSet()
+    {
+            GameSystem.self.rhymeChain++;
+            float GrooveIncreaseValue = Mathf.Min(Level / 4f , 2f);
+            GameSystem.self.grooveTime += GrooveIncreaseValue * GameSystem.self.bpmCaclRate;
+    
+            float chillingValue = Mathf.Pow(Level, 0.5f) * 2f;
+
+            GameSystem.self.currentLimit -= chillingValue;
     }
 }
 

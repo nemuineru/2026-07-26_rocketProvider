@@ -258,7 +258,7 @@ public class GameSystem : MonoBehaviour
             }
             CaptureRingInstance.gameObject.transform.localScale = Vector3.Lerp(CaptureRingInstance.gameObject.transform.localScale, Vector3.one, Time.fixedDeltaTime * 5f);
             
-            grooveTime -= Time.fixedDeltaTime * bpmCaclRate;
+            grooveTime -= parts.Any(p => p.isConsuming) ? 0f : Time.fixedDeltaTime * bpmCaclRate;
             grooveTime = Mathf.Clamp(grooveTime, 0f, grooveTimeMax);
 
             rhymeChain = grooveTime > 0f ? rhymeChain : 0;
@@ -350,14 +350,15 @@ public class GameSystem : MonoBehaviour
 
         //Debug.Log("Hit : " + isHit);
 
+        //2026-09-25
+        //配送するのはなんかその...かったるいので別方法で処理
+
         if(isHit)
         {
             Debug.Log("Functioning Gathering  - " + hitInfo.collider.gameObject.name);
             Parts HitPart = hitInfo.collider.gameObject.GetComponent<Parts>();
             if(HitPart != null)
             {
-                //配送中のモノはグラブできない. 使用中のも同様.
-                if (HitPart.deliveryTime > 0f || HitPart.isConsuming) return;
                 //得点源にならないものをクリックした時はHPを減らす.
                 if (HitPart.isTrash)
                 {

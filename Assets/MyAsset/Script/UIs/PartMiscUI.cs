@@ -10,6 +10,8 @@ public class PartMiscUI : MonoBehaviour
 
     [SerializeField]
     bool isHitPointUI = true;
+
+    bool isFlickering = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,19 +22,30 @@ public class PartMiscUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(isHitPointUI)
+        textMeshPro.text = part.HitPoint.ToString();
+        if(part.Level >= 4)
         {
-            textMeshPro.text = part.HitPoint.ToString();
+            if(!isFlickering)
+            {
+                textMeshPro.color = new Color(0.7f, 0.4f, 0.3f);
+            }
+            else
+            {
+                textMeshPro.color = Color.white;
+            }
         }
-        else if(part.isConsuming)
+        if(part.isConsuming)
         {
-            textMeshPro.text = part.HitPoint.ToString();
+            if(!isFlickering)
+            {
+                textMeshPro.color = new Color(0.9f, 0.4f, 0.3f);
+            }
+            else
+            {
+                textMeshPro.color = Color.red;
+            }
         }
-        //普通のパーツのレベルは1なので、レベルが1の時は表示しない.
-        else
-        {
-            textMeshPro.text = part.Level <= 2 ? "" : part.Level.ToString();
-        }
+        isFlickering = !isFlickering;
         transform.LookAt(Camera.main.transform.position, Vector3.right);
     }
 }
