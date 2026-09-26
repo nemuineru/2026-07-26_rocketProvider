@@ -248,15 +248,15 @@ public class GameSystem : MonoBehaviour
                     grabbingParts.isGrabbed = false;
                     grabbingParts = null;
                 }
-                // キャプチャリングの準備ができている場合の処理. 
-                if(CaptureRingInstance.isCaptureReady)
-                {
-                    CaptureRingInstance.isButtonReleased = true;
-                    CaptureRingInstance = null;
-                    PrepareCaptureRing();
-                }
+                // // キャプチャリングの準備ができている場合の処理. 
+                // if(CaptureRingInstance.isCaptureReady)
+                // {
+                //     CaptureRingInstance.isButtonReleased = true;
+                //     CaptureRingInstance = null;
+                //     PrepareCaptureRing();
+                // }
             }
-            CaptureRingInstance.gameObject.transform.localScale = Vector3.Lerp(CaptureRingInstance.gameObject.transform.localScale, Vector3.one, Time.fixedDeltaTime * 5f);
+            //CaptureRingInstance.gameObject.transform.localScale = Vector3.Lerp(CaptureRingInstance.gameObject.transform.localScale, Vector3.one, Time.fixedDeltaTime * 5f);
             
             grooveTime -= parts.Any(p => p.isConsuming) ? 0f : Time.fixedDeltaTime * bpmCaclRate;
             grooveTime = Mathf.Clamp(grooveTime, 0f, grooveTimeMax);
@@ -265,11 +265,11 @@ public class GameSystem : MonoBehaviour
             //時間経過で緩やかに. 但しrhymeChainが1以上の時は進行しない。
             if (rhymeChain == 0)
             {
-                currentLimit += Time.fixedDeltaTime * limitRate * .25f;
+                currentLimit += Time.fixedDeltaTime * limitRate * .75f;
             }
             else
             {
-                currentLimit += Time.fixedDeltaTime * limitRate * .1f;
+                currentLimit += Time.fixedDeltaTime * limitRate * .05f;
             }
             currentLimit = Mathf.Clamp(currentLimit, 0, maxLimit);
 
@@ -339,8 +339,8 @@ public class GameSystem : MonoBehaviour
     }
     void PrepareCaptureRing()
     {
-        GameObject captureRingObj = Instantiate(CaptureRingPrefab.gameObject, captureRingPos.position, Quaternion.identity);
-        CaptureRingInstance = captureRingObj.GetComponent<PartsCapture>();
+        // GameObject captureRingObj = Instantiate(CaptureRingPrefab.gameObject, captureRingPos.position, Quaternion.identity);
+        // CaptureRingInstance = captureRingObj.GetComponent<PartsCapture>();
     }
     
     void GrabParts()

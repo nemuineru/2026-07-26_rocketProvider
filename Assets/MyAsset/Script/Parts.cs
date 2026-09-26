@@ -84,13 +84,13 @@ public class Parts : MonoBehaviour
             //ある程度のスピードが乗った状態で衝突した時融合. 対象のレベルが低い時のみ
             if(isGrabbed && hitPart != null)
             {
-                //同じカラーで同じパーツで融合. 融合先のパーツに切り替える...のは無法すぎる.
-                if((hitPart.PartType == PartType && hitPart.color == color) && rb.velocity.magnitude > 1.0f && hitPart.Level <= Level)
+                //同じカラー or 同じパーツで融合. 融合先のパーツに切り替える...のは無法すぎる.
+                if((hitPart.PartType == PartType || hitPart.color == color) && rb.velocity.magnitude > 1.0f && hitPart.Level <= Level)
                 {
                     hitPart.Deletation(false, true);
                     Level += hitPart.Level;
-                    color = hitPart.color;
-                    PartType = hitPart.PartType;
+                    //color = hitPart.color;
+                    //PartType = hitPart.PartType;
                     //settingParts();
                 }
             }
@@ -138,7 +138,7 @@ public class Parts : MonoBehaviour
         }
     }
 
-    float deleteMinLevel = 3f;
+    float deleteMinLevel = 5f;
 
     // Update is called once per frame
     void FixedUpdate()
@@ -362,6 +362,7 @@ public class Parts : MonoBehaviour
             float chillingValue = Mathf.Pow(Level, 0.5f) * 2f;
 
             GameSystem.self.currentLimit -= chillingValue;
+            GameSystem.self.consumer.throwtoDanball(color, PartType);
     }
 }
 

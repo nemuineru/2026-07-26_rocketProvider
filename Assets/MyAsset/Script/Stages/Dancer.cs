@@ -31,7 +31,7 @@ public class Dancer : MonoBehaviour
     {
         if (GameSystem.self.rhymeChain > 0 && GameSystem.self.rhymeChain % 4 == 1 && BeatRecorded != GameSystem.self.currentBeatNum) // Assuming a 4-beat cycle for the dancer
         {
-            animator.SetTrigger("OnBeat");
+            //animator.SetTrigger("OnBeat");
             BeatRecorded = GameSystem.self.currentBeatNum;
             RandomPose = Random.Range(0, Randomrange); // Assuming 4 different poses
         }
@@ -39,7 +39,7 @@ public class Dancer : MonoBehaviour
 
     void StatusSet()
     {
-        bool isIdle = GameSystem.self.dangerCount >= 10f && GameSystem.self.rhymeChain == 0;
+        bool isIdle = true;
         bool isDanger = !isIdle && GameSystem.self.rhymeChain == 0;
         bool isGameOver = GameSystem.self.dangerCount <= 0f;
         animator.SetBool("OnIdle", isIdle);

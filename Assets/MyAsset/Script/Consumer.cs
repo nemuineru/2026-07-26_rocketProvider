@@ -19,14 +19,13 @@ public class Consumer : MonoBehaviour
 
     public int SetBeatAt = 2;
 
+    [SerializeField]
     Animator animator;
 
     int dividerNum = 3;
 
     int beatErased = -4;
 
-    [SerializeField]
-    GameObject Gateways;
 
     [SerializeField]
     public Bounds boundary;
@@ -42,18 +41,47 @@ public class Consumer : MonoBehaviour
 
     void Start()
     {
-        animator = GetComponent<Animator>();
-        for(int i = 0 ; i < MaxParts * dividerNum; i++)
-        {
-            GameObject segmentPart = 
-            Instantiate(GameSystem.self.SegmentParts);
-            SegmentParts.Add(segmentPart);
-        }
+        //animator = GetComponent<Animator>();
+        // for(int i = 0 ; i < MaxParts * dividerNum; i++)
+        // {
+        //     GameObject segmentPart = 
+        //     Instantiate(GameSystem.self.SegmentParts);
+        //     SegmentParts.Add(segmentPart);
+        // }
     }
 
     void FixedUpdate()
     {
+        resettime -= Time.fixedDeltaTime;
+        if(resettime < 0f)
+        {
+            animator.ResetTrigger("Throw");
+        }
+    }
 
+    [SerializeField]
+    OnPacked_Anim onPackedAnim;
+
+    float resettime = 0f;
+    public void throwtoDanball(int partsColor, int partsType)
+    {
+        if(animator != null && onPackedAnim != null)
+        {
+            animator.SetTrigger("Throw");
+            OnPacked_Anim packedAnimObj = 
+            Instantiate(onPackedAnim.gameObject,headPosTransform.position,Quaternion.identity).GetComponent<OnPacked_Anim>();
+            packedAnimObj.splineContainer = splineContainer;
+            packedAnimObj.partsColor = partsColor;
+            packedAnimObj.partsType = partsType;
+            resettime = .14f;
+        }
+    }
+
+
+    GameObject Gateways;
+
+    void consumeUpdate()
+    {        
         int beatMatch = 
             GameSystem.self.currentBeatNum;
 

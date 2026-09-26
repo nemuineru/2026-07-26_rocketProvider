@@ -15,6 +15,9 @@ public class BeltMovement : MonoBehaviour
     [SerializeField]
     float MaterialLength = 0.3f;
 
+    [SerializeField]
+    bool isDecorative = false;
+
     void OnCollisionStay(Collision c)
     {
         Parts pt = c.gameObject.GetComponent<Parts>();
@@ -41,9 +44,10 @@ public class BeltMovement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        Speed = GameSystem.self.speed;
         calcSpeed = Mathf.Lerp(calcSpeed, Speed * (GameSystem.self.gameTime > 0f ? 1f : 0.1f),0.1f);
         CurrentVal += calcSpeed * Time.fixedDeltaTime;
         material.mainTextureOffset = Vector2.up * (CurrentVal / MaterialLength);
+        if(isDecorative) return;
+        Speed = GameSystem.self.speed;
     }
 }
