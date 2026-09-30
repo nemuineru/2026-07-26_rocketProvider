@@ -34,11 +34,11 @@ public class PartsCapture : MonoBehaviour
             }
             ErasingTime -= Time.deltaTime;
         }
-        else if(BeatRecorded != GameSystem.self.currentBeatNum)
+        else if(BeatRecorded != GameSystem.self.currentBeatNum_Int)
         {
-            int BeatNum = GameSystem.self.currentBeatNum;
+            int BeatNum = GameSystem.self.currentBeatNum_Int;
             // Instantiate(BeatEffInstance[Mathf.Max(0,BeatNum) % BeatEffInstance.Count], transform.position, Quaternion.identity);
-            BeatRecorded = GameSystem.self.currentBeatNum;
+            BeatRecorded = GameSystem.self.currentBeatNum_Int;
         }
         transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * ErasingTime / 0.4f, Time.deltaTime * 5f);
         if(ErasingTime <= 0f)

@@ -53,6 +53,10 @@ public class Parts : MonoBehaviour
     [SerializeField]
     public GameObject erasingEffect;
 
+    //転送準備開始時のエフェクト
+    [SerializeField]
+    public GameObject PartDetonateEff;
+
 
     //転がってたりするときのエフェクト
     [SerializeField]
@@ -131,6 +135,8 @@ public class Parts : MonoBehaviour
     void Start()
     {
         init();
+        PartDetonateEff_inst = Instantiate(PartDetonateEff, transform);
+        PartDetonateEff_inst.SetActive(false);
         if (!isTrash && color >= 0)
         {
             setStatusNum(color, PartType);
@@ -139,10 +145,25 @@ public class Parts : MonoBehaviour
     }
 
     float deleteMinLevel = 5f;
+    
+    float ExplodingEff = 0;
+    int ExplodingEffdur = 0;
+
+    GameObject PartDetonateEff_inst;
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        if(Level > deleteMinLevel || isConsuming)
+        {
+        PartDetonateEff_inst.SetActive(true);
+            int f = Mathf.FloorToInt(GameSystem.self.currentBeatNum_Float * Level / deleteMinLevel);
+            ExplodingEff = f > ExplodingEffdur ? 0f : Mathf.Lerp(ExplodingEff, 2f, 0.04f);
+            mainRenderer.material.SetFloat("_RimMax", ExplodingEff / 4f);
+            mainRenderer.material.SetFloat("_RimMin", ExplodingEff);
+            ExplodingEffdur = f;
+        }
+        
         if(Level > deleteMinLevel && !isGrabbed)
         {
             isDamaging = true;
@@ -153,10 +174,10 @@ public class Parts : MonoBehaviour
         if(!isConsuming)
         {
             HitPoint = Level;
-            beatStart = GameSystem.self.currentBeatNum;
+            beatStart = GameSystem.self.currentBeatNum_Int;
         }
         //消費中の処理
-        else if(beatStart < GameSystem.self.currentBeatNum)
+        else if(beatStart < GameSystem.self.currentBeatNum_Int)
         {
             //大きいほど、HPの減少が遅くなる. つまり、レベルが高いほど、HPの減少が遅くなる.
             //但し、大きくなりすぎないように.
@@ -185,7 +206,7 @@ public class Parts : MonoBehaviour
             }
 
             HitPoint -= (int)DecreaseValue;
-            beatStart = GameSystem.self.currentBeatNum;
+            beatStart = GameSystem.self.currentBeatNum_Int;
         }
         //キャプチャーされているときは考慮しない.
         //collider.enabled = isGrabbed;

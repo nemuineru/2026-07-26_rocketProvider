@@ -69,12 +69,12 @@ public class Manufacture : MonoBehaviour
     public void Packing(bool isCritical = false)
     {
         Instantiate(NormalPackage, transform.position - transform.up * 2f, Quaternion.identity);
-        if (InsideParts.Count > 0 && !isPacking && BeatRecorded != GameSystem.self.currentBeatNum)
+        if (InsideParts.Count > 0 && !isPacking && BeatRecorded != GameSystem.self.currentBeatNum_Int)
         {
             calcDesc = "";
             Debug.Log("Packing initiated");
             isPacking = true;
-            BeatRecorded = GameSystem.self.currentBeatNum;
+            BeatRecorded = GameSystem.self.currentBeatNum_Int;
             Parts resultPart;
             GameObject instPart;
             resultPart = CalculateParts(InsideParts, isCritical);

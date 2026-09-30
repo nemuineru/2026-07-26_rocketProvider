@@ -98,7 +98,9 @@ public class GameSystem : MonoBehaviour
     public float bpmCaclRate = 1.0f;
     public float exactMusicTime = 1.0f;
 
-    public int currentBeatNum, recorededBeatNum = 0;
+    public int currentBeatNum_Int, recorededBeatNum = 0;
+
+    public float currentBeatNum_Float;
 
     public enum GameState
     {
@@ -278,9 +280,11 @@ public class GameSystem : MonoBehaviour
             bpmCaclRate = 60f / tempo;
             if (exactMusicTime < audioLoopPointTime)
             {
-                recorededBeatNum = currentBeatNum;
+                recorededBeatNum = currentBeatNum_Int;
             }
-            currentBeatNum = recorededBeatNum + Mathf.Max(0, Mathf.FloorToInt((exactMusicTime - audioOffset) / (60f / tempo)));
+            currentBeatNum_Float = recorededBeatNum +(exactMusicTime - audioOffset) / (60f / tempo);
+            currentBeatNum_Int = recorededBeatNum + 
+            Mathf.Max(0, Mathf.FloorToInt(currentBeatNum_Float));
             audioLoopPointTime = exactMusicTime;
         }
 
@@ -400,7 +404,7 @@ public class GameSystem : MonoBehaviour
 
     internal bool CheckBeatInSync(float Duration)
     {
-        int currentBeat = self.currentBeatNum - self.recorededBeatNum;
+        int currentBeat = self.currentBeatNum_Int - self.recorededBeatNum;
         float beatTime = 60f / self.tempo;
         float exactMusicTime = self.exactMusicTime - self.audioOffset;
         float beatPosition = exactMusicTime / beatTime;

@@ -29,10 +29,10 @@ public class Dancer : MonoBehaviour
 
     void OnBeatUpdation()
     {
-        if (GameSystem.self.rhymeChain > 0 && GameSystem.self.rhymeChain % 4 == 1 && BeatRecorded != GameSystem.self.currentBeatNum) // Assuming a 4-beat cycle for the dancer
+        if (GameSystem.self.rhymeChain > 0 && GameSystem.self.rhymeChain % 4 == 1 && BeatRecorded != GameSystem.self.currentBeatNum_Int) // Assuming a 4-beat cycle for the dancer
         {
             //animator.SetTrigger("OnBeat");
-            BeatRecorded = GameSystem.self.currentBeatNum;
+            BeatRecorded = GameSystem.self.currentBeatNum_Int;
             RandomPose = Random.Range(0, Randomrange); // Assuming 4 different poses
         }
     }

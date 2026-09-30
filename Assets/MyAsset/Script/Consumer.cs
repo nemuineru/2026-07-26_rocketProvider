@@ -83,7 +83,7 @@ public class Consumer : MonoBehaviour
     void consumeUpdate()
     {        
         int beatMatch = 
-            GameSystem.self.currentBeatNum;
+            GameSystem.self.currentBeatNum_Int;
 
         //bool canErase = beatErased <= beatMatch - 2;        
 
