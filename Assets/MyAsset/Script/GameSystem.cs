@@ -315,7 +315,7 @@ public class GameSystem : MonoBehaviour
                 }
                 if(Input.GetMouseButtonDown(0))
                 {
-                    UnityEngine.SceneManagement.SceneManager.LoadScene("TitleScene");
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("ResultScene");
                 }
             }
         }
