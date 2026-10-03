@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.Splines;
@@ -143,6 +144,12 @@ public class GameSystem : MonoBehaviour
 
         public AudioClip levelMusic;
     }
+
+    float endTime = 1.2f;
+    [SerializeField]
+    TransitionsPlus.TransitionAnimator transitionsPlus;
+
+    bool isTransitioning = false;
 
     //Static化
     void Awake()
@@ -314,6 +321,17 @@ public class GameSystem : MonoBehaviour
                     obj.SetActive(true);
                 }
                 if(Input.GetMouseButtonDown(0))
+                {
+                    isTransitioning = true;
+                }
+            }
+            if(isTransitioning)
+            {
+                transitionsPlus.enabled = true;
+                transitionsPlus.progress = Mathf.Lerp(1f, 0f, 1f - endTime / 1f);
+                transitionsPlus.UpdateMaterialProperties();
+                endTime -= Time.fixedDeltaTime;
+                if(endTime <= 0f)
                 {
                     UnityEngine.SceneManagement.SceneManager.LoadScene("ResultScene");
                 }
