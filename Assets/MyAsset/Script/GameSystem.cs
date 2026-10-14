@@ -7,6 +7,7 @@ using UnityEngine.Splines;
 
 public class GameSystem : MonoBehaviour
 {
+    public Vector3 rayOrigin, rayDirection;
     //高レベルパーツ生成用のゲームオブジェクト
     public GameObject PartPurePrefab;
 
