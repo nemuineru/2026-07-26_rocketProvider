@@ -31,7 +31,7 @@ public class BeltMovement : MonoBehaviour
         Parts pt = c.gameObject.GetComponent<Parts>();
         if(pt != null)
         {
-            pt.rb.AddForce(transform.forward * 1f + transform.up * 1f, ForceMode.VelocityChange);
+            pt.rb.AddForce((transform.forward + transform.up) * calcSpeed, ForceMode.VelocityChange);
         }
     }
 
