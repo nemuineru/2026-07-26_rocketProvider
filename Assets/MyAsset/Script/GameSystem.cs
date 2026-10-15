@@ -7,7 +7,10 @@ using UnityEngine.Splines;
 
 public class GameSystem : MonoBehaviour
 {
+    public bool inDemomode;
     public Vector3 rayOrigin, rayDirection;
+
+
     //高レベルパーツ生成用のゲームオブジェクト
     public GameObject PartPurePrefab;
 
@@ -220,9 +223,11 @@ public class GameSystem : MonoBehaviour
             {
                 IngameAudio.Play();
             }
-            SetRay();
+            SetInput();
             DebugView();
-            InputInstance.self.InputUpdate();
+            
+            MainRay.origin = rayOrigin;
+            MainRay.direction = rayDirection;
 
             parts = parts.Where(i => i != null).ToList();
             if (InputInstance.self.isClicked)
@@ -342,20 +347,29 @@ public class GameSystem : MonoBehaviour
     }
     
 
-    void SetRay()
+    void SetInput()
     {
+        // デモモード中はRayを設定しない
+        if(inDemomode)
+        {
+            return;
+        }
+
+        // 入力情報更新, デモンストレーション時の入力処理等を考慮..
+        InputInstance.self.InputUpdate();
+
+
         Camera mainCam = Camera.main;
 
         Vector3 StPos = Camera.main.transform.position;
         Vector3 pos = Camera.main.ScreenToWorldPoint(InputInstance.self.position); 
-        if(mainCam.orthographic == true)
+        Ray retRay = new Ray(pos, mainCam.transform.forward);
+        if(mainCam.orthographic !=true)
         {
-            MainRay = new Ray(pos,mainCam.transform.forward);
+            retRay = mainCam.ScreenPointToRay(InputInstance.self.position);
         }
-        else
-        {
-            MainRay = mainCam.ScreenPointToRay(InputInstance.self.position);
-        }
+        rayOrigin = retRay.origin;
+        rayDirection = retRay.direction;
     }
     void PrepareCaptureRing()
     {
