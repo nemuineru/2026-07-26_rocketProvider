@@ -380,7 +380,7 @@ public class GameSystem : MonoBehaviour
     void GrabParts()
     {
         LayerMask lMask = LayerMask.GetMask("Entity") + LayerMask.GetMask("CapturedEntity");
-        bool isHit = Physics.SphereCast(MainRay.origin, 0.5f, MainRay.direction, out RaycastHit hitInfo, 50f , lMask);
+        bool isHit = Physics.SphereCast(MainRay.origin, 2.5f, MainRay.direction, out RaycastHit hitInfo, 50f , lMask);
 
         //Debug.Log("Hit : " + isHit);
 
