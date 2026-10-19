@@ -39,8 +39,8 @@ public class InputInstance : MonoBehaviour
             position = inputMaster.Basic.ScreenPosition.ReadValue<Vector2>();
             isClicked = inputMaster.Basic.Click.ReadValue<float>() > 0.5f;
             isFastforwarded = inputMaster.Basic.FastForward.ReadValue<float>() > 0.5f;
-            clickingTime = isClicked ? clickingTime + 1 : 0;
         // Vector3 pos = Camera.main.ScreenToWorldPoint(position);
         }
+        clickingTime = isClicked ? clickingTime + 1 : 0;
     }
 }

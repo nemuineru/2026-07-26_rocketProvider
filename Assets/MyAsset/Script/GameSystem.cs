@@ -172,7 +172,6 @@ public class GameSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        currentLimit = 0;
         PrepareCaptureRing();
     }
 
@@ -349,14 +348,15 @@ public class GameSystem : MonoBehaviour
 
     void SetInput()
     {
+        // 入力情報更新, デモンストレーション時の入力処理等を考慮..
+        InputInstance.self.InputUpdate();
+        
         // デモモード中はRayを設定しない
         if(inDemomode)
         {
             return;
         }
 
-        // 入力情報更新, デモンストレーション時の入力処理等を考慮..
-        InputInstance.self.InputUpdate();
 
 
         Camera mainCam = Camera.main;
