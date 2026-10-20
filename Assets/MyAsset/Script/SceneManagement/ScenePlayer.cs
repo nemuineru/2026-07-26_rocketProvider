@@ -16,6 +16,8 @@ public class ScenePlayer : MonoBehaviour
 
     public MenuType currentMenuType = MenuType.MainGame;
 
+    public string LoadSceneName;
+
     public enum MenuType
     {
         MainGame,
@@ -53,13 +55,14 @@ public class ScenePlayer : MonoBehaviour
             Application.Quit();
         }
         if( playTime >= transitionsPlus.profile.duration){
-            SceneManager.LoadScene("MainGameScene");
+            SceneManager.LoadScene(LoadSceneName);
         }
         playTime += Time.deltaTime * (transitionsPlus.isPlaying ? 1 : 0);
     }
 
-    public void StartTransition()
+    public void StartTransition(string sceneName)
     {
+        LoadSceneName = sceneName;
         transitionsPlus.Play();
     }
 

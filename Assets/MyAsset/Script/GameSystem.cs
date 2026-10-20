@@ -104,6 +104,8 @@ public class GameSystem : MonoBehaviour
 
     public float currentBeatNum_Float;
 
+    public float GrabSize = 2.0f;
+
     public enum GameState
     {
         Playing,
@@ -380,7 +382,7 @@ public class GameSystem : MonoBehaviour
     void GrabParts()
     {
         LayerMask lMask = LayerMask.GetMask("Entity") + LayerMask.GetMask("CapturedEntity");
-        bool isHit = Physics.SphereCast(MainRay.origin, 2.5f, MainRay.direction, out RaycastHit hitInfo, 50f , lMask);
+        bool isHit = Physics.SphereCast(MainRay.origin, GrabSize, MainRay.direction, out RaycastHit hitInfo, 50f , lMask);
 
         //Debug.Log("Hit : " + isHit);
 
