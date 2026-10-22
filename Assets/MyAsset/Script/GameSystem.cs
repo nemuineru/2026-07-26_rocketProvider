@@ -341,7 +341,7 @@ public class GameSystem : MonoBehaviour
                 }
             }
         }
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if(InputInstance.self.escapePressedTime == 1)
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene("TitleScene");
         }

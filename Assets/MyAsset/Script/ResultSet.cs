@@ -55,7 +55,7 @@ public class ResultSet : MonoBehaviour
         if(miscText != null && miscText.IsActive() && timeToAwait < 0)
         {
             miscText.text = "click to return Main menu.";
-            if(Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(0))
+            if(InputInstance.self.escapePressedTime == 1 || Input.GetMouseButtonDown(0))
             {
                 UnityEngine.SceneManagement.SceneManager.LoadScene("TitleScene");
             }

@@ -50,9 +50,13 @@ public class ScenePlayer : MonoBehaviour
         gameInstructSet.SetActive(currentMenuType == MenuType.Instruction);
         gameTitleSet.SetActive(currentMenuType == MenuType.MainGame);
 
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if(InputInstance.self.escapePressedTime == 1)
         {
-            Application.Quit();
+            #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+            #else
+                Application.Quit();
+            #endif
         }
         if( playTime >= transitionsPlus.profile.duration){
             SceneManager.LoadScene(LoadSceneName);
