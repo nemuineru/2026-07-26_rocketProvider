@@ -3,9 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TransitionsPlus;
+using UnityEngine.Localization.Settings;
 
 public class ScenePlayer : MonoBehaviour
 {
+    public enum LocaleType
+    {
+        Japanese,
+        English
+    }
+
+    public LocaleType currentLocale = LocaleType.Japanese;
+
     static public ScenePlayer instance;
 
     [SerializeField]
@@ -73,5 +82,18 @@ public class ScenePlayer : MonoBehaviour
     public void SetMenuType(string menuType)
     {
         currentMenuType = (MenuType)System.Enum.Parse(typeof(MenuType), menuType);
+    }
+
+    public async void SetLocale(string enumLocale)
+    {
+        currentLocale = (LocaleType)System.Enum.Parse(typeof(LocaleType), enumLocale);
+        var locale = LocalizationSettings.AvailableLocales.Locales.Find((x) => x.Identifier.Code == enumLocale);
+
+        // Localeの設定
+        LocalizationSettings.SelectedLocale = locale;
+
+        // 初期化待ち
+        await LocalizationSettings.InitializationOperation.Task;
+    
     }
 }

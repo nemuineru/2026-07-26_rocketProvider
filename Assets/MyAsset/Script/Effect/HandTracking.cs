@@ -19,7 +19,11 @@ public class HandTracking : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        bool isClicked = InputInstance.self.isClicked;
+        bool isClicked = false;
+        if(InputInstance.self != null)
+        {
+            isClicked = InputInstance.self.isClicked;
+        }
         meshFilter.mesh = isClicked ? mesh_Grab : mesh_Release;
         Plane plane = new Plane(Vector3.up, GameSystem.self.PartPlane.transform.position);
        

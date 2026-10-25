@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: String_Locales_en
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 02f5e7104a974664eb666b174c962429, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 11451613184
+    m_Localized: 'Click and Hold to grab the CANDY.
+
+      And SpaceKey to Fast forward
+      it.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 259980902400
+    m_Localized: 'Hit the other same COLOR or SHAPE of CANDY
+
+      And it will grow
+      up.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 530630950912
+    m_Localized: LV 6 or above level CANDY will EXPLODE.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 724193886208
+    m_Localized: You could Combine the candy like this.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 827403124736
+    m_Localized: 'Higher Candy level means,
+
+      Explosion Effect more bigger.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1060736450560
+    m_Localized: 'Explosion will trigger lesser explosion.
+
+      Focus for chain
+      reactions.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1197093273600
+    m_Localized: 'Thats wrap.
+
+      ESC key to return menu.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1777828216832
+    m_Localized: 'Explosion delivers the Limit gauge releafs.
+
+      Don''t make
+      it reach 100%.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5759141265408
+    m_Localized: V0.2.6
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

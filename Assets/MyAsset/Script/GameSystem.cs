@@ -8,6 +8,9 @@ using UnityEngine.Splines;
 public class GameSystem : MonoBehaviour
 {
     public bool inDemomode;
+
+    public int clickInput = 0;
+    public int ffwdInput = 0;
     public Vector3 rayOrigin, rayDirection;
 
 
@@ -193,12 +196,12 @@ public class GameSystem : MonoBehaviour
         limitRate = currentGameState == GameState.Playing ? levelDatas[LoadLevel].limitDecreasingRate : 0f;
         missedDecreaseMultiplier = currentGameState == GameState.Playing ? levelDatas[LoadLevel].missedDecreaseMultiplier : 0f;
 
-        if(rhymeChain > 0 && InputInstance.self.isClicked && !InputInstance.self.isFastforwarded)
+        if(rhymeChain > 0 && !(ffwdInput > 0))
         {
             speed /= 5.0f;
             generatingRate /= 5.0f;
         }
-        else if(InputInstance.self.isFastforwarded)
+        else if(ffwdInput > 0)
         {
             speed *= 5.0f;
             generatingRate *= 5.0f;
@@ -231,7 +234,7 @@ public class GameSystem : MonoBehaviour
             MainRay.direction = rayDirection;
 
             parts = parts.Where(i => i != null).ToList();
-            if (InputInstance.self.isClicked)
+            if (clickInput > 0)
             {
                 //Debug.Log("Click");
                 if (grabbingParts != null)
@@ -245,7 +248,7 @@ public class GameSystem : MonoBehaviour
                 }
 
                 //押した瞬間、ボタン押しの判定にする. また、パーツのグラブ判定もここで発生させる.
-                if (grabbingParts == null && InputInstance.self.clickingTime == 1)
+                if (grabbingParts == null && clickInput == 1)
                 {
                     GrabParts();
                     GetCaptureRing();
@@ -341,7 +344,8 @@ public class GameSystem : MonoBehaviour
                 }
             }
         }
-        if(InputInstance.self.escapePressedTime == 1)
+        if((InputInstance.self != null && InputInstance.self.escapePressedTime == 1)
+        || (InputInstance.self == null && Input.GetKeyDown(KeyCode.Escape)))
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene("TitleScene");
         }
@@ -350,14 +354,14 @@ public class GameSystem : MonoBehaviour
 
     void SetInput()
     {
-        // 入力情報更新, デモンストレーション時の入力処理等を考慮..
-        InputInstance.self.InputUpdate();
         
         // デモモード中はRayを設定しない
-        if(inDemomode)
+        if(inDemomode || InputInstance.self == null)
         {
             return;
         }
+        // 入力情報更新, デモンストレーション時の入力処理等を考慮..
+        InputInstance.self.InputUpdate();
 
 
 
@@ -366,6 +370,10 @@ public class GameSystem : MonoBehaviour
         Vector3 StPos = Camera.main.transform.position;
         Vector3 pos = Camera.main.ScreenToWorldPoint(InputInstance.self.position); 
         Ray retRay = new Ray(pos, mainCam.transform.forward);
+
+        clickInput = InputInstance.self.isClicked ? clickInput += 1 : 0;
+        ffwdInput = InputInstance.self.isFastforwarded ? ffwdInput += 1 : 0;
+
         if(mainCam.orthographic !=true)
         {
             retRay = mainCam.ScreenPointToRay(InputInstance.self.position);
