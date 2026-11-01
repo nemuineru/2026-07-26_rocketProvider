@@ -34,6 +34,8 @@ public class Parts : MonoBehaviour
 
     public int beatStart = 0;
 
+    public int OwnerID = 0;
+
     MeshRenderer mainRenderer;
 
     MeshFilter mainMeshFilter;

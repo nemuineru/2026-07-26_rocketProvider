@@ -59,11 +59,12 @@ public class ScenePlayer : MonoBehaviour
         gameInstructSet.SetActive(currentMenuType == MenuType.Instruction);
         gameTitleSet.SetActive(currentMenuType == MenuType.MainGame);
 
+        //WEBGLではEscapeキーでの終了は無効. そうしないとハングアップする
         if(InputInstance.self.escapePressedTime == 1)
         {
             #if UNITY_EDITOR
                 UnityEditor.EditorApplication.isPlaying = false;
-            #else
+            #elif UNITY_STANDALONE || UNITY_STANDALONE_WIN
                 Application.Quit();
             #endif
         }
@@ -86,7 +87,6 @@ public class ScenePlayer : MonoBehaviour
 
     public async void SetLocale(string enumLocale)
     {
-        currentLocale = (LocaleType)System.Enum.Parse(typeof(LocaleType), enumLocale);
         var locale = LocalizationSettings.AvailableLocales.Locales.Find((x) => x.Identifier.Code == enumLocale);
 
         // Localeの設定
@@ -94,6 +94,6 @@ public class ScenePlayer : MonoBehaviour
 
         // 初期化待ち
         await LocalizationSettings.InitializationOperation.Task;
-    
+        Debug.Log("Setting locale to: " + LocalizationSettings.SelectedLocale.ToString() );
     }
 }
