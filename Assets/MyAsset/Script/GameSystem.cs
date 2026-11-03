@@ -9,6 +9,10 @@ public class GameSystem : MonoBehaviour
 {
     public bool inDemomode;
 
+    //What Stage is currently active.
+    //This value will change as the game system is changed.
+    public StageData stageData;
+
     public int clickInput = 0;
     public int ffwdInput = 0;
     public Vector3 rayOrigin, rayDirection;

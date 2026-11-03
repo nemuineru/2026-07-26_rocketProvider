@@ -10,8 +10,30 @@ public class PlayerDesc : MonoBehaviour
     public int playerID;
     public string playerName;
 
+    // Player's PointInput. Needs to be usable at demo..
+    public Vector3 playerPointInputPos;
+    public bool isGrabInput;
+    int grabbedTime;
+
+    public bool isFastForwarded;
+    int fastForwardedTime;
+
+    //public bool 
+
+
+    // Player-specific score and limit values.
+    public float playerScore;
+
+    // limit Max and Current for the player. min is 0.
+    public float playerLimitMax;
+    public float playerLimitCurrent;
+    public float playerDangerCount;
+    public float playerDangerCountMax = 10;
     
-    
+    public float missedDecreaseMultiplier = 1.0f;
+    public float EndTime;
+
+
     //what character this player is using..
     public CharacterData characterData;
 
