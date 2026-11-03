@@ -13,6 +13,8 @@ public class GameSystem : MonoBehaviour
     public int ffwdInput = 0;
     public Vector3 rayOrigin, rayDirection;
 
+    public List<PlayerDesc> Players;
+
 
     //高レベルパーツ生成用のゲームオブジェクト
     public GameObject PartPurePrefab;
