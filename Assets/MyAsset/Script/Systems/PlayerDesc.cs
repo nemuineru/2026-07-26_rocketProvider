@@ -10,6 +10,9 @@ public class PlayerDesc : MonoBehaviour
     public int playerID;
     public string playerName;
 
+    // Player's holding Viewing Axis. We'll use this as manipulation of Hands.
+    public Vector3 playerViewingAxis;
+    
     // Player's PointInput. Needs to be usable at demo..
     public Vector3 playerPointInputPos;
     public bool isGrabInput;
